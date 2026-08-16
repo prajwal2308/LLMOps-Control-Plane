@@ -1,11 +1,15 @@
 # LLMOps Control Plane 🚀
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Online-brightgreen.svg?style=flat&logo=fastapi)](https://llmops-control-plane.onrender.com)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg?style=flat&logo=python)](https://python.org)
 [![Docker](https://img.shields.io/badge/Docker-Supported-2496ED.svg?style=flat&logo=docker)](https://www.docker.com/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Helm%20%7C%20Terraform-326CE5.svg?style=flat&logo=kubernetes)](https://kubernetes.io/)
 [![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Traces%20%26%20Metrics-F54842.svg?style=flat&logo=opentelemetry)](https://opentelemetry.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> **🚀 Live Operations Dashboard:**  
+> Access the live running production control plane at **[https://llmops-control-plane.onrender.com](https://llmops-control-plane.onrender.com)**
 
 An enterprise-grade, self-hostable **LLMOps Gateway & Control Plane** that sits between your applications and LLM providers (OpenAI, Anthropic, Google Gemini, Bedrock, Fireworks, xAI). It provides **real-time telemetry, cost tracking, complexity-based model routing, automatic failover chains, security guardrails, operational alerts, and OpenTelemetry observability** — wrapped in an OpenAI-compatible API interface.
 
