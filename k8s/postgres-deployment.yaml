@@ -1,0 +1,42 @@
+# ==============================================================================
+# LOCAL DEVELOPMENT POSTGRESQL DEPLOYMENT
+# Cloud Replacement Note: In production cloud environments (AWS/GCP/Azure),
+# replace this in-cluster PostgreSQL container with a managed database service
+# (e.g. AWS RDS PostgreSQL, GCP Cloud SQL PostgreSQL, or Azure Database for PostgreSQL).
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: llmops
+  labels:
+    app.kubernetes.io/name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "llmops"
+            - name: POSTGRES_PASSWORD
+              value: "llmops123"
+            - name: POSTGRES_DB
+              value: "llmops_telemetry"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llmops-config
+  namespace: llmops
+data:
+  # Select pluggable telemetry store backend ("postgres" for horizontal scaling, "sqlite" for single-node)
+  TELEMETRY_BACKEND: "postgres"
+  LOG_LEVEL: "INFO"
+  
+  # Stage 5 Operational Alert Thresholds
+  ALERT_WINDOW_SIZE: "50"
+  ERROR_RATE_THRESHOLD: "0.5"
+  PROVIDER_FAILURE_THRESHOLD: "3"
+  COST_SPIKE_THRESHOLD_USD: "1.0"
+  LATENCY_SPIKE_THRESHOLD_MS: "5000.0"

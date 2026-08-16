@@ -1,0 +1,27 @@
+# ==============================================================================
+# KUBERNETES INGRESS MANIFEST
+# Exposes the LLMOps Control Plane API Gateway & Dashboard outside the cluster.
+#
+# Port-Forward Alternative (Local Dev without Ingress Controller):
+#   kubectl port-forward -n llmops svc/llmops-control-plane 8000:8000
+# Then access dashboard at: http://localhost:8000/dashboard
+# ==============================================================================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: llmops-ingress
+  namespace: llmops
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+    - host: llmops.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: llmops-control-plane
+                port:
+                  number: 8000

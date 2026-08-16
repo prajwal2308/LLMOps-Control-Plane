@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llmops-control-plane
+  namespace: llmops
+  labels:
+    app.kubernetes.io/name: llmops-control-plane
+    app.kubernetes.io/component: api-gateway
+spec:
+  # Multi-replica deployment (default: 2) to prove horizontal statelessness
+  replicas: 2
+  selector:
+    matchLabels:
+      app: llmops-control-plane
+  template:
+    metadata:
+      labels:
+        app: llmops-control-plane
+    spec:
+      containers:
+        - name: control-plane
+          image: llmops-control-plane:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: llmops-config
+            - secretRef:
+                name: llmops-secret
+          # Readiness & Liveness probes hitting /health endpoint
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            timeoutSeconds: 2
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

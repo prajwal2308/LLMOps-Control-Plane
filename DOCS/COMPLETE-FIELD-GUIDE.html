@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Complete Field Guide — Your LLMOps Control Plane</title>
+<style>
+  :root{
+    --ink:#12203a; --body:#283445; --paper:#fbfaf7; --paper2:#f4f1ea;
+    --signal:#0f766e; --signal-soft:#e2efed; --amber:#b45309; --amber-soft:#f8efe0;
+    --violet:#5b3e8e; --violet-soft:#efeaf5; --rule:#dcd8cf;
+    --pre-bg:#0f1c2e; --pre-fg:#cfe3e0; --pre-border:transparent;
+    --code-fg:#0b3d39; --link-underline:#bcd7d3; --meta:#6b7280; --faint:#9aa3ad;
+    --mono:'SF Mono','JetBrains Mono','Fira Code',Consolas,'Roboto Mono',monospace;
+    --serif:Georgia,'Iowan Old Style','Palatino Linotype',Palatino,'Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  [data-theme="dark"]{
+    --ink:#eef2f6; --body:#c4ccd6; --paper:#0f1720; --paper2:#17222f;
+    --signal:#2dd4bf; --signal-soft:#0f312c; --amber:#f0a35a; --amber-soft:#2a1f12;
+    --violet:#c3a6ef; --violet-soft:#241a33; --rule:#2b3846;
+    --pre-bg:#0b1220; --pre-fg:#cfe3e0; --pre-border:#24313f;
+    --code-fg:#7fe3d8; --link-underline:#2a5b55; --meta:#8b95a1; --faint:#5b6570;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#eef2f6; --body:#c4ccd6; --paper:#0f1720; --paper2:#17222f;
+      --signal:#2dd4bf; --signal-soft:#0f312c; --amber:#f0a35a; --amber-soft:#2a1f12;
+      --violet:#c3a6ef; --violet-soft:#241a33; --rule:#2b3846;
+      --pre-bg:#0b1220; --pre-fg:#cfe3e0; --pre-border:#24313f;
+      --code-fg:#7fe3d8; --link-underline:#2a5b55; --meta:#8b95a1; --faint:#5b6570;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--body);font-family:var(--serif);
+    font-size:18px;line-height:1.72;-webkit-font-smoothing:antialiased;transition:background .25s ease,color .25s ease}
+  .wrap{max-width:820px;margin:0 auto;padding:0 28px}
+  .theme-toggle{position:fixed;top:16px;right:16px;z-index:50;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--signal);background:var(--paper2);border:1px solid var(--rule);border-radius:6px;padding:7px 11px;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .2s,border-color .2s}
+  .theme-toggle:hover{border-color:var(--signal)}
+  .theme-toggle:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  .signal-line{display:flex;align-items:center;height:1px;background:var(--rule);position:relative}
+  .signal-line::after{content:"";position:absolute;left:0;width:7px;height:7px;border-radius:50%;background:var(--signal);top:-3px}
+  .cover{padding:96px 0 64px;border-bottom:1px solid var(--rule)}
+  .tag{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--signal)}
+  .cover h1{font-family:var(--sans);font-weight:800;color:var(--ink);font-size:44px;line-height:1.06;letter-spacing:-.02em;margin:18px 0 14px}
+  .cover .sub{font-size:21px;color:var(--body);max-width:660px;margin:0 0 26px}
+  .cover .meta{font-family:var(--mono);font-size:12.5px;color:var(--meta);letter-spacing:.04em;line-height:1.9;border-top:1px dashed var(--rule);padding-top:18px;margin-top:30px}
+  .trace-strip{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.05em;margin-top:8px;white-space:nowrap;overflow:hidden}
+  .part{margin:78px 0 8px;padding:30px 0 26px;border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
+  .part .pnum{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--signal);text-transform:uppercase}
+  .part h2{font-family:var(--sans);font-weight:800;color:var(--ink);font-size:30px;margin:8px 0 6px;letter-spacing:-.01em}
+  .part p{margin:6px 0 0;color:var(--body);font-size:17px;opacity:.85}
+  .chap{padding:40px 0 8px}
+  .chap>.ctag{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--signal);text-transform:uppercase}
+  .chap h3{font-family:var(--sans);font-weight:700;color:var(--ink);font-size:26px;line-height:1.15;margin:6px 0 18px;letter-spacing:-.01em}
+  .chap h4{font-family:var(--sans);font-weight:700;color:var(--ink);font-size:19px;margin:30px 0 8px}
+  p{margin:0 0 16px}
+  a{color:var(--signal);text-decoration:none;border-bottom:1px solid var(--link-underline)}
+  a:hover{border-bottom-color:var(--signal)}
+  a:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  strong{color:var(--ink)} em{color:var(--body)}
+  ul,ol{margin:0 0 16px;padding-left:22px} li{margin:0 0 7px}
+  code{font-family:var(--mono);font-size:14.5px;background:var(--paper2);padding:1.5px 6px;border-radius:4px;color:var(--code-fg)}
+  .box{margin:22px 0;padding:16px 20px;border-left:3px solid var(--signal);background:var(--signal-soft);border-radius:0 6px 6px 0}
+  .box .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);display:block;margin-bottom:6px}
+  .box p:last-child{margin-bottom:0} .box ul:last-child,.box ol:last-child{margin-bottom:0}
+  .box.try{border-left-color:var(--amber);background:var(--amber-soft)} .box.try .lbl{color:var(--amber)}
+  .box.next{border-left-color:var(--violet);background:var(--violet-soft)} .box.next .lbl{color:var(--violet)}
+  .box.read{border-left-color:var(--faint);background:var(--paper2)} .box.read .lbl{color:var(--meta)} .box.read ul{margin-bottom:0;font-size:16px}
+  .box.warn{border-left-color:var(--amber);background:var(--amber-soft)} .box.warn .lbl{color:var(--amber)}
+  .analogy{font-style:italic;color:var(--body);opacity:.9;border-left:3px solid var(--rule);padding-left:18px;margin:20px 0}
+  .tw{overflow-x:auto;margin:22px 0}
+  table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:15px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);border-bottom:2px solid var(--ink)}
+  td{color:var(--body)} tr:last-child td{border-bottom:none}
+  pre{background:var(--pre-bg);color:var(--pre-fg);font-family:var(--mono);font-size:13.5px;line-height:1.6;padding:16px 18px;border-radius:8px;overflow-x:auto;margin:20px 0;border:1px solid var(--pre-border)}
+  pre code{background:none;color:inherit;padding:0}
+  .toc{padding:44px 0;border-bottom:1px solid var(--rule)}
+  .toc h2{font-family:var(--sans);font-weight:800;color:var(--ink);font-size:22px;margin:0 0 20px}
+  .toc ol{list-style:none;padding:0;margin:0;font-family:var(--sans);font-size:15.5px}
+  .toc .p-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);margin:22px 0 8px}
+  .toc li{margin:0 0 6px;display:flex;gap:12px;align-items:baseline}
+  .toc li .n{font-family:var(--mono);font-size:12px;color:var(--faint);min-width:30px}
+  .toc a{border-bottom:none;color:var(--body)} .toc a:hover{color:var(--signal)}
+  .badge{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--signal);padding:3px 9px;border-radius:4px;margin-bottom:10px}
+  .badge.amber{background:var(--amber)} .badge.violet{background:var(--violet)} .badge.slate{background:var(--faint)}
+  .gl dt{font-family:var(--sans);font-weight:700;color:var(--ink);margin-top:16px;font-size:16.5px}
+  .gl dd{margin:3px 0 0;font-size:16.5px}
+  footer{margin:80px 0 60px;padding-top:24px;border-top:2px solid var(--ink);font-family:var(--mono);font-size:12px;color:var(--meta);letter-spacing:.04em}
+  @media(max-width:640px){body{font-size:17px}.cover h1{font-size:33px}.cover .sub{font-size:19px}.part h2{font-size:25px}.chap h3{font-size:22px}.trace-strip{display:none}.theme-toggle{top:10px;right:10px}}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+  <span id="themeIcon">☾</span><span id="themeText">Dark</span>
+</button>
+
+<div class="wrap">
+
+<header class="cover">
+  <div class="tag">The Complete Field Guide · Final Edition</div>
+  <h1>Your LLMOps Control Plane, Explained End to End</h1>
+  <p class="sub">The whole project — every stage you built, why each piece exists, and the infrastructure concepts (Terraform, Kubernetes, Helm) that still feel fuzzy — mapped to your actual code, and to how you'd master each.</p>
+  <div class="signal-line"></div>
+  <div class="trace-strip">complete ▸ spine → dashboard → sqlite → docker → routing/failover → alerting → guardrails/otel → k8s → helm → terraform → SHIPPED</div>
+  <div class="meta">
+    STATUS &nbsp;→&nbsp; all 7 stages built. This is the reference for the finished system.<br>
+    WRITTEN FOR &nbsp;→&nbsp; you, to understand and defend everything you built — especially Stage 7.<br>
+    HOW TO READ &nbsp;→&nbsp; Part I recaps the app; Part II demystifies the infra; Part III gets you hired.
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <div class="p-h">Part I · What You Built (the whole system)</div>
+    <li><span class="n">01</span><a href="#c1">The Project in One Picture</a></li>
+    <li><span class="n">02</span><a href="#c2">Stages 0–3: Spine, Dashboard, Persistence, Docker</a></li>
+    <li><span class="n">03</span><a href="#c3">Stage 4: Routing &amp; Failover</a></li>
+    <li><span class="n">04</span><a href="#c4">Stage 5: Alerting</a></li>
+    <li><span class="n">05</span><a href="#c5">Stage 6: Guardrails &amp; OpenTelemetry</a></li>
+
+    <div class="p-h">Part II · Stage 7, Demystified</div>
+    <li><span class="n">06</span><a href="#c6">The Big Idea: Statelessness</a></li>
+    <li><span class="n">07</span><a href="#c7">Docker → Kubernetes → Helm → Terraform (the ladder)</a></li>
+    <li><span class="n">08</span><a href="#c8">What Terraform Is Actually Doing (in YOUR files)</a></li>
+    <li><span class="n">09</span><a href="#c9">How the Cloud Swap Works (GCP/AWS)</a></li>
+    <li><span class="n">10</span><a href="#c10">How to Actually Master These</a></li>
+
+    <div class="p-h">Part III · Ship &amp; Get Hired</div>
+    <li><span class="n">11</span><a href="#c11">The Résumé Entry &amp; The Interview Map</a></li>
+    <li><span class="n">12</span><a href="#c12">What To Do This Week</a></li>
+
+    <div class="p-h">Reference</div>
+    <li><span class="n">13</span><a href="#c13">Glossary of Stage-7 Terms</a></li>
+    <li><span class="n">14</span><a href="#c14">Curated Learning Links</a></li>
+  </ol>
+</nav>
+
+<!-- PART I -->
+<section class="part" id="p1">
+  <div class="pnum">Part I</div>
+  <h2>What You Built</h2>
+  <p>A fast recap of the whole system, so the full arc is in one place. You know these stages — this is the map that connects them.</p>
+</section>
+
+<article class="chap" id="c1">
+  <div class="ctag">Chapter 01</div>
+  <h3>The Project in One Picture</h3>
+  <p>You built a <strong>self-hostable LLMOps control plane</strong>: a service that sits between applications and LLM providers and gives an operator visibility and control over every model call. Here is the complete request journey, with the file that owns each step:</p>
+
+  <pre><code>  App
+   │  OpenAI-style request
+   ▼
+┌──────────────────  YOUR CONTROL PLANE  ──────────────────┐
+│  guardrails.py   → input safety (injection / PII)        │
+│  routing.py      → pick provider/model + failover order  │
+│  providers.py    → call the chosen backend (mock/claude) │
+│      └─ on failure → try next in the plan (failover)     │
+│  guardrails.py   → output safety                         │
+│  telemetry.py    → record the attempt (SQLite/Postgres)  │
+│  otel.py         → emit OpenTelemetry traces + metrics   │
+│  alerts.py       → check for cost/latency/error spikes   │
+└───────────────────────────┬──────────────────────────────┘
+   │  response + routing info
+   ▼
+  App          …and dashboard.html reads the telemetry live.</code></pre>
+
+  <div class="box">
+    <span class="lbl">The One-Sentence Pitch ▸</span>
+    <p>"A self-hostable LLMOps control plane that sits in front of LLM providers with per-request observability, routing, failover, safety guardrails, and operational alerting — deployed to Kubernetes as infrastructure-as-code." Every noun is a thing you built.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c2">
+  <div class="ctag">Chapter 02</div>
+  <h3>Stages 0–3: Spine, Dashboard, Persistence, Docker</h3>
+  <p><strong>Stage 0 — the spine.</strong> <code>main.py</code> receives an OpenAI-style request, routes it to a provider, times it, records telemetry, returns the answer. This established the two things everything needs: one point every request flows through, and one place every request is recorded.</p>
+  <p><strong>Stage 1 — the dashboard.</strong> <code>dashboard.html</code> is a pure reader of your <code>/telemetry</code> endpoints — no database of its own. The summary cards are the <em>metrics</em> pillar; the request table is the <em>logs</em> pillar.</p>
+  <p><strong>Stage 2 — persistence.</strong> You swapped the in-memory list for SQLite <em>behind the same <code>TelemetryStore</code> interface</em>, so nothing else changed. That "stable interface hiding the implementation" idea is the backbone of the whole codebase — and it's exactly what makes Stage 7's Postgres swap possible.</p>
+  <p><strong>Stage 3 — Docker.</strong> Your <code>Dockerfile</code> + <code>docker-compose.yml</code> package the app (and Redis) so <code>docker compose up --build</code> runs everything identically anywhere. This is the unit Kubernetes will later orchestrate.</p>
+
+  <div class="box">
+    <span class="lbl">The Thread ▸</span>
+    <p>Notice the pattern already forming: each layer hides its details behind a clean boundary. Storage hides behind <code>TelemetryStore</code>. The app hides behind a container. This is the single idea that scales all the way up to Stage 7.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c3">
+  <div class="ctag">Chapter 03</div>
+  <h3>Stage 4: Routing &amp; Failover</h3>
+  <p><code>routing.py</code> is <em>pure logic</em> — no network, no database. It returns an ordered list of <code>(provider, model)</code> attempts: routing (cheap tier for simple prompts, strong tier for complex) plus failover backups. <code>main.py</code> walks that list, trying each until one succeeds, recording <em>every</em> attempt as telemetry.</p>
+  <p>The key behavior to defend: a long prompt with no provider and no API key does <strong>not</strong> error out. The router picks the strong tier (anthropic); it fails with no key; that failure is recorded; the loop <em>continues</em> to the next attempt (mock), which succeeds. The request survives — that is the entire point of failover. You also upgraded this later to tell a <em>client error</em> (don't fail over) apart from a <em>provider error</em> (do) — a genuinely sharp addition.</p>
+
+  <div class="box">
+    <span class="lbl">Why routing.py Is Pure ▸</span>
+    <p>Decisions live apart from side-effects. Routing <em>decides</em>; <code>main.py</code> <em>acts</em>. That makes routing testable with no mocks or keys, and lets you change strategy without touching how requests are recorded. Same reason <code>TelemetryStore</code> hides storage — the one design idea, applied again.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c4">
+  <div class="ctag">Chapter 04</div>
+  <h3>Stage 5: Alerting</h3>
+  <p><code>alerts.py</code> is another pure module: it takes recent telemetry in and returns fired alerts out. Four rules — error-rate spike, provider-failure burst, cost spike, latency spike — each with tunable thresholds at the top. <code>main.py</code>'s <code>/alerts</code> endpoint reads recent telemetry, runs the rules, logs anything that fires.</p>
+  <p>The mindset shift this stage taught: alerting only makes sense from the <em>operator's</em> chair. A user never wants an alert; the company running the system needs to know a provider is degrading <em>before</em> it becomes a visible outage. And it stays strictly on <em>operational</em> signals (cost, latency, errors) — never the unsolved "was the answer good" problem.</p>
+
+  <div class="box">
+    <span class="lbl">Your Thresholds ▸</span>
+    <p>You own the numbers. The honest interview answer to "how did you set them?" is: "started conservative, made them tunable constants, would refine against real traffic." That you put them at the top of the module (and in <code>values.yaml</code>) proves you designed for tuning.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c5">
+  <div class="ctag">Chapter 05</div>
+  <h3>Stage 6: Guardrails &amp; OpenTelemetry</h3>
+  <p><strong>Guardrails</strong> (<code>guardrails.py</code>) are the safety checkpoint — the "is this allowed?" layer, distinct from "is this good?". Input/output checks for things like prompt injection and PII, recorded when they trigger. This shows a control plane isn't only about performance and cost; it's also where safety policy is enforced.</p>
+  <p><strong>OpenTelemetry</strong> (<code>otel.py</code>) is the piece you said is still fuzzy, so here it is plainly: OTel is a <em>vendor-neutral standard</em> for emitting telemetry, so any monitoring tool can read your data without custom glue — the "USB port" of observability. Your file emits two signal types: <em>traces</em> (spans — a timed, labeled unit of work; <code>trace_span</code> wraps each request) and <em>metrics</em> (a request counter, a latency histogram, a cost counter, all with provider/model/status labels).</p>
+
+  <div class="box">
+    <span class="lbl">The Honest Nuance ▸ (worth knowing before an interview)</span>
+    <p>Your <code>telemetry.py</code> → your dashboard is a loop you built <em>for yourself</em>. OTel emits the <em>same</em> signals in the <em>standard</em> format so external, industrial tools (Grafana, Jaeger, Prometheus) can consume them with zero custom work. In your current code, traces print via a console exporter, and the metric instruments are recorded but not yet wired to an exporter/reader — so the visible metric output is the manual print. Totally fine for learning; just say exactly that ("traces export to console; wiring metrics to Prometheus is adding an OTLP exporter") rather than claiming full Grafana integration.</p>
+  </div>
+</article>
+
+<!-- PART II -->
+<section class="part" id="p2">
+  <div class="pnum">Part II</div>
+  <h2>Stage 7, Demystified</h2>
+  <p>The part you're unsure about. Kubernetes, Helm, and especially Terraform — what they actually do, in your actual files, and how to genuinely master them rather than just knowing the words.</p>
+</section>
+
+<article class="chap" id="c6">
+  <div class="ctag">Chapter 06</div>
+  <h3>The Big Idea: Statelessness</h3>
+  <p>Everything in Stage 7 exists to serve one idea, so start here. Your app stored telemetry in a <em>local</em> SQLite file. That's fine for one copy. But to handle real traffic you run <em>many</em> copies (replicas) of the service — and if each copy has its own local file, no copy sees the full picture. The data is fragmented.</p>
+  <p>The fix is <strong>statelessness</strong>: the service itself holds <em>no</em> local state; all shared state moves to shared backends. That's exactly what you built — a <em>pluggable</em> <code>TelemetryStore</code> where an environment variable (<code>TELEMETRY_BACKEND</code>) selects SQLite (local, single node) or <strong>PostgreSQL</strong> (a shared network database all replicas talk to). Your <code>test_statelessness.py</code> proves it: multiple replicas, one shared Postgres, and <code>/telemetry</code> returns a consistent full picture no matter which replica served each request.</p>
+
+  <div class="analogy">Stateful replicas are like cashiers who each keep their own private notebook of sales — ask any one and you get a partial answer. Stateless replicas are cashiers who all write to one shared ledger — ask any of them and you get the whole truth. Postgres is the shared ledger.</div>
+
+  <div class="box">
+    <span class="lbl">Why This Is THE Stage-7 Answer ▸</span>
+    <p>If an interviewer asks one question about your deployment, it's "how does this scale?" The answer is this chapter: "the service is stateless — telemetry in shared Postgres, counters in shared Redis — so I run N replicas behind a load balancer and they behave as one." That sentence is your distributed-systems background showing, and you built the proof.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c7">
+  <div class="ctag">Chapter 07</div>
+  <h3>Docker → Kubernetes → Helm → Terraform (the ladder)</h3>
+  <p>These four tools confuse people because they sound similar but sit at different rungs of one ladder. Here's the whole thing in order, each building on the last:</p>
+
+  <div class="tw"><table>
+    <tr><th>Rung</th><th>Answers the question</th><th>In your project</th></tr>
+    <tr><td><strong>Docker</strong></td><td>"How do I package one app to run anywhere?"</td><td>Your <code>Dockerfile</code> — one container image of the control plane.</td></tr>
+    <tr><td><strong>Kubernetes</strong></td><td>"How do I run many copies of that container, keep them alive, and network them?"</td><td>Your <code>k8s/</code> manifests — Deployment (replicas), Service (networking), ConfigMap/Secret (config), plus Postgres &amp; Redis.</td></tr>
+    <tr><td><strong>Helm</strong></td><td>"How do I package all those Kubernetes files into one installable, configurable unit?"</td><td>Your <code>chart/</code> — templated manifests + <code>values.yaml</code>. One <code>helm install</code> deploys everything.</td></tr>
+    <tr><td><strong>Terraform</strong></td><td>"How do I create the cluster and everything around it as code, from nothing?"</td><td>Your <code>terraform/</code> — provisions the environment and deploys your Helm chart.</td></tr>
+  </table></div>
+
+  <p>Read that top to bottom and the confusion dissolves: Docker packages <em>one app</em>; Kubernetes <em>runs many</em>; Helm <em>packages the Kubernetes setup</em>; Terraform <em>provisions the whole environment</em>. Each rung wraps the one below it.</p>
+
+  <div class="box">
+    <span class="lbl">Key Distinction ▸ Helm vs Terraform</span>
+    <p>The one people mix up. <strong>Helm</strong> deploys <em>applications onto</em> a Kubernetes cluster. <strong>Terraform</strong> provisions <em>infrastructure</em> — including the cluster itself, plus databases, networks, and, yes, it can then invoke Helm. Rule of thumb: Terraform builds the <em>house</em> (and the plot of land); Helm moves your <em>furniture</em> in. Your Terraform literally does both — it makes the namespace and then calls your Helm chart.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c8">
+  <div class="ctag">Chapter 08</div>
+  <h3>What Terraform Is Actually Doing (in YOUR files)</h3>
+  <p>You said Terraform is the fuzzy one — "something deployed in production on GCP/AWS that I don't know yet." Let's fix that using <em>your</em> <code>terraform/main.tf</code>, because you've actually already used it; you just haven't named what it did.</p>
+
+  <p><strong>What Terraform is, in one line:</strong> a tool that lets you describe infrastructure in text files and create it with one command (<code>terraform apply</code>) — so your infrastructure is version-controlled, reviewable, and reproducible instead of clicked together by hand. That's <em>Infrastructure as Code</em>.</p>
+
+  <p>Your file has three parts. First, it declares which <strong>providers</strong> (plugins) it needs — the <code>kubernetes</code> and <code>helm</code> providers:</p>
+  <pre><code>terraform {
+  required_providers {
+    kubernetes = { source = "hashicorp/kubernetes" }
+    helm       = { source = "hashicorp/helm" }
+  }
+}</code></pre>
+
+  <p>Second, it creates a <strong>resource</strong> — a Kubernetes namespace to deploy into:</p>
+  <pre><code>resource "kubernetes_namespace" "llmops" {
+  metadata { name = var.namespace }
+}</code></pre>
+
+  <p>Third — and this is the important part — it uses a <code>helm_release</code> resource to <strong>deploy your Helm chart</strong>, passing in values like replica count and the API key:</p>
+  <pre><code>resource "helm_release" "llmops" {
+  name      = "llmops"
+  chart     = "../chart"
+  namespace = kubernetes_namespace.llmops.metadata[0].name
+  values    = [ /* replicaCount, secrets... */ ]
+}</code></pre>
+
+  <p>So what your Terraform <em>actually does</em>: with one <code>terraform apply</code>, it creates a namespace and installs your entire Helm chart (app + Postgres + Redis) into your cluster. It's the single "on switch" for the whole platform. That's not a mystery anymore — that's the file you already wrote.</p>
+
+  <div class="box">
+    <span class="lbl">The Mental Model ▸ Declarative</span>
+    <p>Terraform is <em>declarative</em>: you describe the <em>end state</em> you want ("a namespace, and my chart installed"), and Terraform figures out how to get there — creating what's missing, and (if you change the file and re-apply) updating only what changed. You don't write step-by-step commands; you declare the destination. Same philosophy as your Kubernetes YAML, which declares "I want 2 replicas" rather than "start a replica, then start another."</p>
+  </div>
+
+  <div class="box try">
+    <span class="lbl">Try This ▸</span>
+    <p>Open <code>terraform/main.tf</code> and read the big comment block at the top — you (or your AI) wrote a clear "cloud swap note" there. Trace how the <code>helm_release</code> resource stays identical whether you target local or cloud. When you can explain those three parts (providers, namespace resource, helm_release) out loud, Terraform is no longer fuzzy — you understand your own file.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c9">
+  <div class="ctag">Chapter 09</div>
+  <h3>How the Cloud Swap Works (GCP/AWS)</h3>
+  <p>Your instinct — "Terraform is really used in production on GCP/AWS" — is exactly right, and your project is set up to show precisely that transition. You deployed to <em>local</em> Kubernetes (kind/minikube) on purpose: it teaches the identical skills without a cloud bill. The leap to production is smaller than it looks, and your files even document it.</p>
+  <p>Two things change when you go to real cloud, and <em>nothing else does</em>:</p>
+  <ul>
+    <li><strong>The cluster.</strong> Instead of a local cluster, Terraform provisions a managed one — <strong>EKS</strong> on AWS or <strong>GKE</strong> on GCP — usually via a ready-made module (your comment block literally shows <code>module "eks"</code>).</li>
+    <li><strong>The stateful backends.</strong> Instead of running Postgres and Redis as pods in the cluster, you point at <em>managed</em> services — AWS <strong>RDS</strong> (Postgres) and <strong>ElastiCache</strong> (Redis) — because a real company wants the cloud provider to run their database, not a pod.</li>
+  </ul>
+  <p>The crucial insight, and a great thing to say in an interview: <strong>your <code>helm_release</code> stays 100% identical.</strong> The application, the chart, the Kubernetes manifests — all unchanged. Only the <em>infrastructure underneath</em> (the cluster and the databases) swaps from local to managed cloud. That's the whole payoff of building it this way: the same artifact deploys anywhere.</p>
+
+  <div class="box">
+    <span class="lbl">Why You Don't Need To Do It Now ▸</span>
+    <p>Provisioning real EKS/GKE costs money and hours and teaches nothing beyond what your local setup already taught. For your goal, "it deploys to any Kubernetes cluster — here's the Helm chart and Terraform, and here's exactly where the cloud swap happens" is a <em>complete</em>, strong answer. You've demonstrated the skill. Spend the cloud bill later, when a job is paying for it.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c10">
+  <div class="ctag">Chapter 10</div>
+  <h3>How to Actually Master These</h3>
+  <p>You said the real problem: "I know what the terms do, but other than that I'm not aware — how do I <em>master</em> the concepts?" Here's the honest truth about mastering infrastructure tools, because it's different from mastering, say, an algorithm.</p>
+
+  <p><strong>You don't master them by reading. You master them by breaking and fixing them.</strong> Infra knowledge is almost entirely <em>troubleshooting</em> knowledge — nobody memorizes Kubernetes; they've just debugged enough broken pods to have intuition. The path is deliberately hitting failures and recovering. Concretely, on your own project:</p>
+
+  <div class="box try">
+    <span class="lbl">The Mastery Drills ▸ (do these on your finished project)</span>
+    <ul>
+      <li><strong>Break a pod.</strong> Set the image tag to something wrong and <code>helm upgrade</code>. Watch it fail (<code>kubectl get pods</code> → <code>CrashLoopBackOff</code>), then <code>kubectl describe pod</code> and <code>kubectl logs</code> to diagnose it, then fix it. This one drill teaches more than a week of reading.</li>
+      <li><strong>Scale it live.</strong> Change <code>replicaCount</code> from 2 to 5, re-apply, and watch <code>kubectl get pods</code> show five. Then kill one (<code>kubectl delete pod ...</code>) and watch Kubernetes recreate it. <em>That's</em> what "self-healing orchestration" means — you'll never forget it after seeing it.</li>
+      <li><strong>Prove statelessness yourself.</strong> Run your <code>test_statelessness.py</code>, then read it and explain why hitting different replicas still returns one consistent telemetry picture (shared Postgres).</li>
+      <li><strong>Change one Terraform value and re-apply.</strong> Bump <code>replica_count</code> in <code>terraform.tfvars</code>, run <code>terraform plan</code> (read what it says will change — this is the magic: it shows you the diff <em>before</em> doing it), then <code>terraform apply</code>. Watching <code>plan</code> predict the change is the moment Terraform clicks.</li>
+      <li><strong>Follow one request end-to-end with <code>kubectl</code>.</strong> <code>kubectl port-forward</code> to your service, hit <code>/dashboard</code>, send a request, watch it appear. Connecting "my laptop command" to "running in a cluster" is the intuition that matters.</li>
+    </ul>
+  </div>
+
+  <p>Do those five, and you'll have <em>operated</em> the tools, not just read about them — which is the only kind of mastery that survives an interview or a 3am incident. The commands above (<code>kubectl get/describe/logs</code>, <code>helm upgrade</code>, <code>terraform plan/apply</code>) are 90% of what you'll ever use day to day.</p>
+
+  <div class="box">
+    <span class="lbl">The Realistic Bar ▸</span>
+    <p>You do <em>not</em> need to be a Kubernetes expert to get hired for AI-infra roles — you need to have <em>genuinely deployed a real service</em> and be able to reason about it. You've done that. "Mastery" here means comfortable troubleshooting and clear mental models, not memorizing every API object. Aim for that bar; you're close to it.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Just-In-Time Reading ▸</span>
+    <ul>
+      <li><strong>Kubernetes docs → "Concepts," then "Tutorials"</strong> (kubernetes.io/docs) — read the Concept page for whatever you're debugging that day, not cover to cover.</li>
+      <li><strong>HashiCorp "Terraform Tutorials"</strong> (developer.hashicorp.com/terraform) — do the Kubernetes track.</li>
+      <li><strong>Helm docs → "Using Helm" &amp; "Charts"</strong> (helm.sh/docs).</li>
+      <li><strong>"Borg, Omega, and Kubernetes"</strong> (Google, 2016) — one evening, for the <em>why</em> behind it all. Great interview color.</li>
+    </ul>
+  </div>
+</article>
+
+<!-- PART III -->
+<section class="part" id="p3">
+  <div class="pnum">Part III</div>
+  <h2>Ship &amp; Get Hired</h2>
+  <p>The project is done. This is the part that turns it into a job — which was the entire point from the very beginning.</p>
+</section>
+
+<article class="chap" id="c11">
+  <div class="ctag">Chapter 11</div>
+  <h3>The Résumé Entry &amp; The Interview Map</h3>
+  <p><strong>The résumé bullet</strong> (drop the star count until you have one):</p>
+  <pre><code>LLMOps Control Plane | GitHub | Python, FastAPI, Postgres, Redis,
+                               Docker, Kubernetes, Helm, Terraform, OpenTelemetry
+• Built a self-hostable control plane in front of LLM providers with per-request
+  observability (latency/token/cost), multi-provider routing + automatic failover,
+  safety guardrails, and operational alerting on cost/latency/error anomalies.
+• Emitted OpenTelemetry traces + metrics; designed a stateless service (shared
+  Postgres + Redis) that scales horizontally across replicas.
+• Packaged as infrastructure-as-code — Helm chart + Terraform — deployable to any
+  Kubernetes cluster (local or cloud EKS/GKE with managed RDS/ElastiCache).</code></pre>
+
+  <p><strong>The questions this pre-loads</strong> — and you can answer every one from what you built:</p>
+  <div class="tw"><table>
+    <tr><th>They ask</th><th>You answer with</th></tr>
+    <tr><td>"Walk me through the architecture."</td><td>The request-journey diagram (Ch. 1).</td></tr>
+    <tr><td>"How does failover work?"</td><td>The pure router + the loop in main.py (Ch. 3).</td></tr>
+    <tr><td>"How does this scale?"</td><td>Statelessness — shared Postgres/Redis, N replicas (Ch. 6).</td></tr>
+    <tr><td>"What's the difference between Helm and Terraform?"</td><td>House vs furniture (Ch. 7).</td></tr>
+    <tr><td>"What does your Terraform do?"</td><td>Providers, namespace, helm_release — the on-switch (Ch. 8).</td></tr>
+    <tr><td>"How would you take this to AWS/GCP?"</td><td>Swap cluster→EKS/GKE, DB→RDS; chart stays identical (Ch. 9).</td></tr>
+    <tr><td>"What's OpenTelemetry for?"</td><td>Vendor-neutral emit; standard tools plug in (Ch. 5).</td></tr>
+    <tr><td>"How do you test non-deterministic systems?"</td><td>Mock provider; test the plumbing deterministically.</td></tr>
+    <tr><td>"What would you improve?"</td><td>Wire OTel metrics to a real exporter; retries/backoff/circuit breakers; a fine-tuned complexity router.</td></tr>
+  </table></div>
+
+  <div class="box">
+    <span class="lbl">Your Real Edge ▸</span>
+    <p>You built this stage by stage and understood each piece — so every answer is <em>true</em>, not memorized. The "what would you improve" row is your secret weapon: naming real limits (the OTel metric exporter gap, no circuit breaker yet, the crude complexity heuristic) is exactly how senior engineers talk, and it signals you understand the system deeply enough to see its edges.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c12">
+  <div class="ctag">Chapter 12</div>
+  <h3>What To Do This Week</h3>
+  <p>The build is finished. The goal was never the build — it was the job. So this week is about turning the project into interviews. In priority order:</p>
+  <ol>
+    <li><strong>Put it on GitHub, public and clean.</strong> A tidy repo with a real commit history is the artifact people actually look at.</li>
+    <li><strong>Write a pain-first README.</strong> Lead with the problem (no single place to see cost/latency/failures across LLM providers), then a demo, then features, then the architecture diagram, then one-command run. Not "here's my telemetry subsystem" — "here's the problem this solves."</li>
+    <li><strong>Record a 90-second demo GIF</strong> for the top of the README: traffic flowing, the dashboard lighting up, a failover happening (kill a provider → watch it recover), an alert firing. That clip does more than the whole résumé bullet.</li>
+    <li><strong>Do the five mastery drills</strong> (Ch. 10) so you can defend Stage 7 under questioning.</li>
+    <li><strong>Start applying — to AI-infra / platform / ML-platform / DevOps roles</strong> — and fix the application funnel (the résumé, and the work-authorization answer that filters you out before a human reads it). The project is ready; the funnel is now the bottleneck.</li>
+  </ol>
+
+  <div class="box next">
+    <span class="lbl">The Honest Closing Note ▸</span>
+    <p>You came in wanting one viral project to make you a master overnight. What you actually did is better and more durable: you built a real, complete system in a field that doesn't churn, understood every layer, and can defend it. That's what gets people hired — not stars, not novelty. The build is done. Now ship it and go get the job it was always for.</p>
+  </div>
+</article>
+
+<!-- REFERENCE -->
+<section class="part" id="p4">
+  <div class="pnum">Reference</div>
+  <h2>Reference</h2>
+  <p>A glossary of the Stage-7 terms and a short, curated set of links.</p>
+</section>
+
+<article class="chap" id="c13">
+  <div class="ctag">Chapter 13</div>
+  <h3>Glossary of Stage-7 Terms</h3>
+  <dl class="gl">
+    <dt>Container (Docker)</dt><dd>A portable package of an app + its dependencies that runs identically anywhere. Your <code>Dockerfile</code> builds one.</dd>
+    <dt>Image / Registry</dt><dd>A built container is an "image"; a "registry" is where images are stored/shared (e.g. Docker Hub).</dd>
+    <dt>Kubernetes (K8s)</dt><dd>The orchestrator that runs many containers across machines — restarting, scaling, networking them.</dd>
+    <dt>Pod</dt><dd>The smallest deployable unit in Kubernetes — usually one container. Your app runs in pods.</dd>
+    <dt>Deployment</dt><dd>A Kubernetes object that keeps a desired number of identical pods running (your <code>replicaCount</code>).</dd>
+    <dt>ReplicaSet</dt><dd>The set of identical pods a Deployment manages.</dd>
+    <dt>Service</dt><dd>A stable network endpoint in front of a set of pods (pods have no stable IP; the Service does).</dd>
+    <dt>ConfigMap</dt><dd>Kubernetes object holding non-secret config (your alert thresholds, backend choice).</dd>
+    <dt>Secret</dt><dd>Kubernetes object holding sensitive values (your <code>ANTHROPIC_API_KEY</code>, DB URL). Never committed.</dd>
+    <dt>Namespace</dt><dd>A logical partition inside a cluster (your Terraform creates the <code>llmops</code> namespace).</dd>
+    <dt>Ingress</dt><dd>Routes external traffic into cluster Services (or use <code>port-forward</code> locally).</dd>
+    <dt>Volume</dt><dd>Storage that outlives a pod — needed for stateful things like a database.</dd>
+    <dt>Helm</dt><dd>A package manager for Kubernetes; a "chart" bundles templated manifests + <code>values.yaml</code>.</dd>
+    <dt>Chart / values.yaml</dt><dd>Your <code>chart/</code> is the package; <code>values.yaml</code> holds the knobs an operator tunes.</dd>
+    <dt>Terraform</dt><dd>Infrastructure-as-code: describe infrastructure in files, create it with <code>terraform apply</code>.</dd>
+    <dt>Provider (Terraform)</dt><dd>A plugin that lets Terraform manage a system (you use the <code>kubernetes</code> and <code>helm</code> providers).</dd>
+    <dt>Resource (Terraform)</dt><dd>One thing Terraform manages (your namespace, your <code>helm_release</code>).</dd>
+    <dt>helm_release</dt><dd>A Terraform resource that installs a Helm chart — how your Terraform deploys your app.</dd>
+    <dt>terraform plan / apply</dt><dd><code>plan</code> shows what will change before doing it; <code>apply</code> makes it happen.</dd>
+    <dt>Declarative</dt><dd>You describe the desired end state; the tool figures out how to reach it. K8s and Terraform both work this way.</dd>
+    <dt>Stateless</dt><dd>The service keeps no local state; shared state lives in shared backends — the key to horizontal scaling.</dd>
+    <dt>Horizontal scaling</dt><dd>Handling more load by running more copies (replicas), not a bigger single machine.</dd>
+    <dt>EKS / GKE / AKS</dt><dd>Managed Kubernetes on AWS / GCP / Azure — the cloud swap for your local cluster.</dd>
+    <dt>RDS / ElastiCache</dt><dd>AWS managed Postgres / managed Redis — the cloud swap for your in-cluster Postgres/Redis.</dd>
+  </dl>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c14">
+  <div class="ctag">Chapter 14</div>
+  <h3>Curated Learning Links</h3>
+  <div class="box read">
+    <span class="lbl">Docs (learn just-in-time, not cover-to-cover) ▸</span>
+    <ul>
+      <li><strong>Kubernetes</strong> — kubernetes.io/docs (start: Concepts → Tutorials → "Hello Minikube").</li>
+      <li><strong>Terraform</strong> — developer.hashicorp.com/terraform (do the Kubernetes tutorial track).</li>
+      <li><strong>Helm</strong> — helm.sh/docs ("Using Helm" &amp; "Charts").</li>
+      <li><strong>Docker</strong> — docs.docker.com ("Get Started") and docker-curriculum.com.</li>
+      <li><strong>OpenTelemetry</strong> — opentelemetry.io/docs ("Observability Primer," "Concepts").</li>
+    </ul>
+  </div>
+  <div class="box read">
+    <span class="lbl">For the "why" (one evening each) ▸</span>
+    <ul>
+      <li><strong>"Borg, Omega, and Kubernetes"</strong> (Google, ACM Queue 2016) — the thinking behind Kubernetes, by its creators.</li>
+      <li><strong>Google SRE Book</strong> (free at sre.google/books) — the canonical text on operating systems in production; the operator mindset your whole project embodies.</li>
+      <li><strong>"The Twelve-Factor App"</strong> (12factor.net) — timeless principles for deployable services (config, statelessness, and more).</li>
+    </ul>
+  </div>
+</article>
+
+<footer>
+  THE COMPLETE FIELD GUIDE · YOUR LLMOPS CONTROL PLANE · FINAL EDITION<br>
+  All seven stages, built and understood. The build is done — now ship it, and go get the job it was for.
+</footer>
+
+</div>
+
+<script>
+  (function(){
+    var root=document.documentElement, btn=document.getElementById('themeToggle'),
+        icon=document.getElementById('themeIcon'), text=document.getElementById('themeText');
+    function saved(){ try{return localStorage.getItem('fg-theme');}catch(e){return null;} }
+    function store(v){ try{localStorage.setItem('fg-theme',v);}catch(e){} }
+    function isDark(){
+      var t=root.getAttribute('data-theme');
+      if(t) return t==='dark';
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    function paint(){ var d=isDark(); icon.textContent=d?'☀':'☾'; text.textContent=d?'Light':'Dark'; }
+    var s=saved(); if(s) root.setAttribute('data-theme',s);
+    paint();
+    btn.addEventListener('click',function(){
+      var next=isDark()?'light':'dark';
+      root.setAttribute('data-theme',next); store(next); paint();
+    });
+  })();
+</script>
+</body>
+</html>

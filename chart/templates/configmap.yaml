@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "llmops.fullname" . }}-config
+  labels:
+    {{- include "llmops.labels" . | nindent 4 }}
+data:
+  TELEMETRY_BACKEND: {{ .Values.telemetry.backend | quote }}
+  LOG_LEVEL: "INFO"
+  ALERT_WINDOW_SIZE: {{ .Values.alertThresholds.windowSize | quote }}
+  ERROR_RATE_THRESHOLD: {{ .Values.alertThresholds.errorRate | quote }}
+  PROVIDER_FAILURE_THRESHOLD: {{ .Values.alertThresholds.providerFailures | quote }}
+  COST_SPIKE_THRESHOLD_USD: {{ .Values.alertThresholds.costSpikeUsd | quote }}
+  LATENCY_SPIKE_THRESHOLD_MS: {{ .Values.alertThresholds.latencySpikeMs | quote }}

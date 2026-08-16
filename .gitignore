@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# SQLite databases & transient runtime state
+*.db
+*.sqlite3
+telemetry.db
+
+# macOS & OS artifacts
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Large media & archive files (>100MB git limit safety)
+*.m4b
+*.zip
+*.tar.gz

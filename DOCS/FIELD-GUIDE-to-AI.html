@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Field Guide to the AI World — From First Principles to Production</title>
+<script>
+  (function() {
+    var savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+  })();
+</script>
+<style>
+  :root{
+    --ink:#12203a;        /* deep navy ink: headings */
+    --body:#283445;       /* slate: body text */
+    --paper:#fbfaf7;      /* warm-white paper */
+    --paper2:#f4f1ea;     /* panel tint */
+    --signal:#0f766e;     /* teal: the one accent (telemetry signal) */
+    --signal-soft:#e2efed;
+    --amber:#b45309;      /* burnt amber: try/attention */
+    --amber-soft:#f8efe0;
+    --violet:#5b3e8e;     /* frontier / what's next */
+    --violet-soft:#efeaf5;
+    --rule:#dcd8cf;       /* hairline */
+    --meta-text:#6b7280;
+    --sub-text:#54606f;
+    --num-text:#9aa3ad;
+    --code-color:#0b3d39;
+    --code-bg:var(--paper2);
+    --link-border:#bcd7d3;
+    --analogy-text:#455063;
+    --read-bg:#f1f3f5;
+    --read-border:#64748b;
+    --read-lbl:#475569;
+    --pre-bg:#0f1c2e;
+    --pre-color:#cfe3e0;
+    --toggle-bg:rgba(251, 250, 247, 0.85);
+    --toggle-border:#dcd8cf;
+    --toggle-text:#12203a;
+    --toggle-shadow:0 4px 12px rgba(0, 0, 0, 0.08);
+    --mono:'SF Mono','JetBrains Mono','Fira Code',Consolas,'Roboto Mono',monospace;
+    --serif:Georgia,'Iowan Old Style','Palatino Linotype',Palatino,'Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #f1f5f9;
+      --body: #cbd5e1;
+      --paper: #0b1120;
+      --paper2: #151d30;
+      --signal: #2dd4bf;
+      --signal-soft: rgba(45, 212, 191, 0.14);
+      --amber: #fbbf24;
+      --amber-soft: rgba(251, 191, 36, 0.14);
+      --violet: #c084fc;
+      --violet-soft: rgba(192, 132, 252, 0.14);
+      --rule: #1e293b;
+      --meta-text: #94a3b8;
+      --sub-text: #94a3b8;
+      --num-text: #64748b;
+      --code-color: #5eead4;
+      --code-bg: #151d30;
+      --link-border: #134e4a;
+      --analogy-text: #cbd5e1;
+      --read-bg: #151d30;
+      --read-border: #475569;
+      --read-lbl: #94a3b8;
+      --pre-bg: #070d18;
+      --pre-color: #e2e8f0;
+      --toggle-bg: rgba(21, 29, 48, 0.85);
+      --toggle-border: #334155;
+      --toggle-text: #f8fafc;
+      --toggle-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #f1f5f9;
+    --body: #cbd5e1;
+    --paper: #0b1120;
+    --paper2: #151d30;
+    --signal: #2dd4bf;
+    --signal-soft: rgba(45, 212, 191, 0.14);
+    --amber: #fbbf24;
+    --amber-soft: rgba(251, 191, 36, 0.14);
+    --violet: #c084fc;
+    --violet-soft: rgba(192, 132, 252, 0.14);
+    --rule: #1e293b;
+    --meta-text: #94a3b8;
+    --sub-text: #94a3b8;
+    --num-text: #64748b;
+    --code-color: #5eead4;
+    --code-bg: #151d30;
+    --link-border: #134e4a;
+    --analogy-text: #cbd5e1;
+    --read-bg: #151d30;
+    --read-border: #475569;
+    --read-lbl: #94a3b8;
+    --pre-bg: #070d18;
+    --pre-color: #e2e8f0;
+    --toggle-bg: rgba(21, 29, 48, 0.85);
+    --toggle-border: #334155;
+    --toggle-text: #f8fafc;
+    --toggle-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  :root[data-theme="light"] {
+    --ink: #12203a;
+    --body: #283445;
+    --paper: #fbfaf7;
+    --paper2: #f4f1ea;
+    --signal: #0f766e;
+    --signal-soft: #e2efed;
+    --amber: #b45309;
+    --amber-soft: #f8efe0;
+    --violet: #5b3e8e;
+    --violet-soft: #efeaf5;
+    --rule: #dcd8cf;
+    --meta-text: #6b7280;
+    --sub-text: #54606f;
+    --num-text: #9aa3ad;
+    --code-color: #0b3d39;
+    --code-bg: var(--paper2);
+    --link-border: #bcd7d3;
+    --analogy-text: #455063;
+    --read-bg: #f1f3f5;
+    --read-border: #64748b;
+    --read-lbl: #475569;
+    --pre-bg: #0f1c2e;
+    --pre-color: #cfe3e0;
+    --toggle-bg: rgba(251, 250, 247, 0.85);
+    --toggle-border: #dcd8cf;
+    --toggle-text: #12203a;
+    --toggle-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--paper);color:var(--body);
+    font-family:var(--serif);font-size:18px;line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  .wrap{max-width:820px;margin:0 auto;padding:0 28px}
+  .measure{max-width:720px}
+
+  /* ---- signal-line divider (the signature motif) ---- */
+  .signal-line{display:flex;align-items:center;gap:0;margin:0;height:1px;
+    background:var(--rule);position:relative}
+  .signal-line::after{content:"";position:absolute;left:0;width:7px;height:7px;
+    border-radius:50%;background:var(--signal);top:-3px}
+
+  /* ---- theme toggle button ---- */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--toggle-text);
+    background: var(--toggle-bg);
+    border: 1px solid var(--toggle-border);
+    border-radius: 9999px;
+    cursor: pointer;
+    box-shadow: var(--toggle-shadow);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .theme-toggle:hover {
+    transform: translateY(-1px);
+    border-color: var(--signal);
+  }
+  .theme-toggle:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+  .theme-toggle svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+  @media (max-width: 640px) {
+    .theme-toggle {
+      top: 12px;
+      right: 12px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .theme-toggle span {
+      display: none;
+    }
+  }
+
+  /* ---- cover ---- */
+  .cover{padding:96px 0 64px;border-bottom:1px solid var(--rule)}
+  .tag{font-family:var(--mono);font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--signal)}
+  .cover h1{font-family:var(--sans);font-weight:800;color:var(--ink);
+    font-size:46px;line-height:1.05;letter-spacing:-.02em;margin:18px 0 14px}
+  .cover .sub{font-size:21px;color:var(--body);max-width:640px;margin:0 0 26px}
+  .cover .meta{font-family:var(--mono);font-size:12.5px;color:var(--meta-text);
+    letter-spacing:.04em;line-height:1.9;border-top:1px dashed var(--rule);
+    padding-top:18px;margin-top:30px}
+  .trace-strip{font-family:var(--mono);font-size:11px;color:var(--num-text);
+    letter-spacing:.05em;margin-top:8px;white-space:nowrap;overflow:hidden}
+
+  /* ---- parts ---- */
+  .part{margin:78px 0 8px;padding:30px 0 26px;border-top:2px solid var(--ink);
+    border-bottom:1px solid var(--rule)}
+  .part .pnum{font-family:var(--mono);font-size:12px;letter-spacing:.2em;
+    color:var(--signal);text-transform:uppercase}
+  .part h2{font-family:var(--sans);font-weight:800;color:var(--ink);
+    font-size:30px;margin:8px 0 6px;letter-spacing:-.01em}
+  .part p{margin:6px 0 0;color:var(--sub-text);font-size:17px}
+
+  /* ---- chapters ---- */
+  .chap{padding:40px 0 8px}
+  .chap>.ctag{font-family:var(--mono);font-size:12px;letter-spacing:.12em;
+    color:var(--signal);text-transform:uppercase}
+  .chap h3{font-family:var(--sans);font-weight:700;color:var(--ink);
+    font-size:26px;line-height:1.15;margin:6px 0 18px;letter-spacing:-.01em}
+  .chap h4{font-family:var(--sans);font-weight:700;color:var(--ink);
+    font-size:19px;margin:30px 0 8px}
+  p{margin:0 0 16px}
+  a{color:var(--signal);text-decoration:none;border-bottom:1px solid var(--link-border);transition:color 0.2s ease, border-color 0.2s ease;}
+  a:hover{border-bottom-color:var(--signal)}
+  a:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  strong{color:var(--ink)}
+  em{color:var(--sub-text);font-style:italic}
+  ul,ol{margin:0 0 16px;padding-left:22px}
+  li{margin:0 0 7px}
+  code{font-family:var(--mono);font-size:14.5px;background:var(--code-bg);
+    padding:1.5px 6px;border-radius:4px;color:var(--code-color)}
+
+  /* ---- callouts ---- */
+  .box{margin:22px 0;padding:16px 20px;border-left:3px solid var(--signal);
+    background:var(--signal-soft);border-radius:0 6px 6px 0}
+  .box .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--signal);display:block;margin-bottom:6px}
+  .box p:last-child{margin-bottom:0}
+  .box.try{border-left-color:var(--amber);background:var(--amber-soft)}
+  .box.try .lbl{color:var(--amber)}
+  .box.next{border-left-color:var(--violet);background:var(--violet-soft)}
+  .box.next .lbl{color:var(--violet)}
+  .box.read{border-left-color:var(--read-border);background:var(--read-bg)}
+  .box.read .lbl{color:var(--read-lbl)}
+  .box.read ul{margin-bottom:0;font-size:16px}
+  .box.warn{border-left-color:var(--amber);background:var(--amber-soft)}
+  .box.warn .lbl{color:var(--amber)}
+  .analogy{font-style:italic;color:var(--analogy-text);border-left:3px solid var(--rule);
+    padding-left:18px;margin:20px 0}
+
+  /* ---- tables ---- */
+  .tw{overflow-x:auto;margin:22px 0}
+  table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:15px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);
+    vertical-align:top}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--ink);border-bottom:2px solid var(--ink)}
+  td{color:var(--body)}
+  tr:last-child td{border-bottom:none}
+
+  /* ---- code panel ---- */
+  pre{background:var(--pre-bg);color:var(--pre-color);font-family:var(--mono);font-size:13.5px;
+    line-height:1.6;padding:16px 18px;border-radius:8px;overflow-x:auto;margin:20px 0}
+  pre code{background:none;color:inherit;padding:0}
+
+  /* ---- TOC ---- */
+  .toc{padding:44px 0;border-bottom:1px solid var(--rule)}
+  .toc h2{font-family:var(--sans);font-weight:800;color:var(--ink);font-size:22px;
+    margin:0 0 20px}
+  .toc ol{list-style:none;padding:0;margin:0;font-family:var(--sans);font-size:15.5px}
+  .toc .p-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--signal);margin:22px 0 8px}
+  .toc li{margin:0 0 6px;display:flex;gap:12px;align-items:baseline}
+  .toc li .n{font-family:var(--mono);font-size:12px;color:var(--num-text);min-width:30px}
+  .toc a{border-bottom:none;color:var(--body)}
+  .toc a:hover{color:var(--signal)}
+
+  /* ---- glossary ---- */
+  .gl{margin:20px 0}
+  .gl dt{font-family:var(--sans);font-weight:700;color:var(--ink);margin-top:16px;font-size:16.5px}
+  .gl dd{margin:3px 0 0;font-size:16.5px}
+
+  footer{margin:80px 0 60px;padding-top:24px;border-top:2px solid var(--ink);
+    font-family:var(--mono);font-size:12px;color:var(--meta-text);letter-spacing:.04em}
+  @media(max-width:640px){
+    body{font-size:17px}
+    .cover h1{font-size:34px}.cover .sub{font-size:19px}
+    .part h2{font-size:25px}.chap h3{font-size:22px}
+    .trace-strip{display:none}
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle light/dark mode">
+  <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <span id="themeToggleText">Theme</span>
+</button>
+
+<div class="wrap">
+
+<!-- ===================== COVER ===================== -->
+<header class="cover">
+  <div class="tag">A Field Guide · Edition 2026</div>
+  <h1>The Field Guide to the AI World</h1>
+  <p class="sub">From first principles to production — everything a newcomer needs to understand modern AI, told as one continuous story that ends at the system you're building.</p>
+  <div class="signal-line"></div>
+  <div class="trace-strip">trace ▸ what_is_ai → neural_nets → llm → tokens → embeddings → rag → agents → telemetry → mlops → llmops → evals → k8s → terraform → your_control_plane → frontier</div>
+  <div class="meta">
+    WRITTEN FOR &nbsp;→&nbsp; someone entering AI from a cloud / systems background<br>
+    ANCHOR PROJECT &nbsp;→&nbsp; a self-hostable LLMOps control plane (observability for LLM apps)<br>
+    HOW TO READ &nbsp;→&nbsp; front to back, or jump via the contents. Every term is defined the first time it appears.
+  </div>
+</header>
+
+<!-- ===================== TOC ===================== -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <div class="p-h">Part I · The Foundations</div>
+    <li><span class="n">01</span><a href="#c1">What "AI" Actually Means (the nested dolls)</a></li>
+    <li><span class="n">02</span><a href="#c2">How a Neural Network Learns</a></li>
+    <li><span class="n">03</span><a href="#c3">What an LLM Is and How It Works</a></li>
+    <li><span class="n">04</span><a href="#c4">The Vocabulary: Tokens, Parameters, Context, Temperature</a></li>
+    <li><span class="n">05</span><a href="#c5">The Models and the Companies Behind Them</a></li>
+
+    <div class="p-h">Part II · Making Models Useful</div>
+    <li><span class="n">06</span><a href="#c6">Prompting and Prompt Engineering</a></li>
+    <li><span class="n">07</span><a href="#c7">Embeddings and Vector Search</a></li>
+    <li><span class="n">08</span><a href="#c8">RAG — Retrieval-Augmented Generation</a></li>
+    <li><span class="n">09</span><a href="#c9">Agents, Tools, and MCP</a></li>
+    <li><span class="n">10</span><a href="#c10">Fine-Tuning vs RAG vs Prompting</a></li>
+
+    <div class="p-h">Part III · Running AI in Production</div>
+    <li><span class="n">11</span><a href="#c11">Why Production AI Is Hard</a></li>
+    <li><span class="n">12</span><a href="#c12">Telemetry and Observability</a></li>
+    <li><span class="n">13</span><a href="#c13">MLOps</a></li>
+    <li><span class="n">14</span><a href="#c14">LLMOps (and how it differs)</a></li>
+    <li><span class="n">15</span><a href="#c15">Evaluation — How You Know It's Working</a></li>
+    <li><span class="n">16</span><a href="#c16">The Infra Layer: Gateways, Caching, Routing, Guardrails</a></li>
+    <li><span class="n">17</span><a href="#c17">Shipping It: Docker, Kubernetes, Terraform, CI/CD</a></li>
+
+    <div class="p-h">Part IV · Your Project in Context</div>
+    <li><span class="n">18</span><a href="#c18">The Control Plane, Mapped to Everything You've Learned</a></li>
+
+    <div class="p-h">Part V · The Frontier</div>
+    <li><span class="n">19</span><a href="#c19">What's New in 2026</a></li>
+    <li><span class="n">20</span><a href="#c20">What Comes Next</a></li>
+
+    <div class="p-h">Part VI · Reference</div>
+    <li><span class="n">21</span><a href="#c21">Glossary of Every Term</a></li>
+    <li><span class="n">22</span><a href="#c22">A Curated Reading List</a></li>
+    <li><span class="n">23</span><a href="#c23">Your Learning Path from Here</a></li>
+  </ol>
+</nav>
+
+<!-- ===================== PART I ===================== -->
+<section class="part" id="p1">
+  <div class="pnum">Part I</div>
+  <h2>The Foundations</h2>
+  <p>Before any tool, any framework, any buzzword — this is what the words actually mean. Read this part slowly. Everything else is built on it.</p>
+</section>
+
+<!-- CH1 -->
+<article class="chap" id="c1">
+  <div class="ctag">Chapter 01</div>
+  <h3>What "AI" Actually Means (the nested dolls)</h3>
+
+  <p>The single most useful thing to understand on day one is that <strong>"AI," "machine learning," and "deep learning" are not three competing things</strong> — they are three sizes of the same nested doll. People use them interchangeably in conversation, which is exactly why newcomers get confused. Here is the real relationship.</p>
+
+  <p><strong>Artificial Intelligence (AI)</strong> is the biggest doll — the whole field. It just means "making machines do things that would normally require human intelligence." A chess program from 1985 that followed hand-written rules was AI. A spam filter is AI. This is a 70-year-old field, not a 2023 invention.</p>
+
+  <p><strong>Machine Learning (ML)</strong> is a doll inside AI. It's a specific <em>approach</em>: instead of a human writing the rules by hand, you show a program thousands of examples and it <em>learns</em> the rules itself. You don't tell it "an email with the word FREE in all caps is spam"; you show it 100,000 emails labeled spam / not-spam and it figures out the patterns.</p>
+
+  <p><strong>Deep Learning (DL)</strong> is a doll inside ML. It's machine learning done with a particular tool — <em>neural networks</em> with many layers (that's what "deep" refers to: many layers). Deep learning is what made image recognition, voice assistants, and — eventually — ChatGPT possible.</p>
+
+  <p>And inside deep learning sits the thing everyone is talking about: <strong>Large Language Models (LLMs)</strong> — a specific kind of deep-learning system trained on text. ChatGPT, Claude, and Gemini are LLMs.</p>
+
+  <div class="analogy">Think of it like transport → motor vehicles → cars → electric cars. Every electric car is a car, every car is a motor vehicle, every motor vehicle is transport. But "transport" also includes bicycles and horses. Every LLM is deep learning, which is machine learning, which is AI — but "AI" also includes that old rule-based chess program.</div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Model</span>
+    <p>You'll hear "model" constantly. A <strong>model</strong> is just the trained artifact — the thing that came out the other end of the learning process. If ML is the <em>process</em> of learning from examples, the model is the <em>result</em>: a big file full of numbers that, given an input, produces an output. When someone says "we're using the GPT-4 model," they mean that specific trained file.</p>
+  </div>
+
+  <div class="box try">
+    <span class="lbl">Try This ▸</span>
+    <p>Say out loud, in your own words, the difference between "AI" and "machine learning." If you can explain why a hand-coded chess program is AI but not machine learning, you've got the core distinction that trips up most beginners.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>3Blue1Brown — "But what is a neural network?"</strong> (YouTube). The single best visual intro to the whole idea. Watch this first, ever.</li>
+      <li><strong>Google's "Machine Learning Crash Course"</strong> (developers.google.com/machine-learning) — free, official, gentle.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH2 -->
+<article class="chap" id="c2">
+  <div class="ctag">Chapter 02</div>
+  <h3>How a Neural Network Learns</h3>
+
+  <p>You don't need the math to work in this field, but you do need the <em>intuition</em>, because it explains why LLMs behave the way they do — including why they sometimes confidently make things up.</p>
+
+  <p>A <strong>neural network</strong> is loosely inspired by the brain. It's made of simple units ("neurons") arranged in layers. Each connection between neurons has a number called a <strong>weight</strong>. Information flows in one side (say, the pixels of an image), gets multiplied and added through all these weighted connections, and comes out the other side as an answer ("this is a cat").</p>
+
+  <p>At the start, all the weights are random, so the network's answers are garbage. Here's the magic loop, called <strong>training</strong>:</p>
+
+  <ol>
+    <li>Show it an example (an image of a cat).</li>
+    <li>It guesses ("dog" — wrong).</li>
+    <li>Measure how wrong the guess was. This number is called the <strong>loss</strong>.</li>
+    <li>Nudge every weight a tiny bit in the direction that would have made the loss smaller. This nudging step is called <strong>backpropagation</strong> plus <strong>gradient descent</strong>.</li>
+    <li>Repeat millions of times.</li>
+  </ol>
+
+  <p>Over millions of examples, the weights slowly settle into values that produce good answers. Nobody programmed the rule for "cat." The network <em>discovered</em> it, encoded as millions of numbers.</p>
+
+  <div class="analogy">Imagine tuning a giant mixing board with a million sliders, in a dark room, by ear. You play a note, it sounds wrong, you nudge every slider slightly toward "less wrong," and repeat forever. Eventually the board is tuned. You have no idea what any individual slider "means" — but together they work. That's why we say neural networks are hard to interpret.</div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Weights / Parameters</span>
+    <p>The <strong>weights</strong> (also called <strong>parameters</strong>) are those tunable numbers. When you hear "Llama 3 has 70 <em>billion</em> parameters," that means 70 billion of these numbers were tuned during training. More parameters generally means more capacity to learn — but also more cost to run. This number is the rough "size" of a model.</p>
+  </div>
+
+  <p>Two words you'll see constantly, now demystified:</p>
+  <ul>
+    <li><strong>Training</strong> = the expensive, one-time (or occasional) process of tuning the weights from data. Costs millions of dollars for a big LLM; done by labs like OpenAI.</li>
+    <li><strong>Inference</strong> = actually <em>using</em> the trained model to get an answer. Cheap per use, but you pay every single time. This is what your app does when it calls the model. <strong>Your entire project is about the inference side — making inference reliable, observable, and cheap.</strong></li>
+  </ul>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>Andrej Karpathy — "Neural Networks: Zero to Hero"</strong> (YouTube). He builds a neural network from nothing, in plain Python. The gold standard. Karpathy was a founding member of OpenAI and led AI at Tesla.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH3 -->
+<article class="chap" id="c3">
+  <div class="ctag">Chapter 03</div>
+  <h3>What an LLM Is and How It Works</h3>
+
+  <p>A <strong>Large Language Model</strong> is a neural network trained on an enormous amount of text — a big slice of the internet, books, code — with one deceptively simple objective: <strong>predict the next word.</strong></p>
+
+  <p>That's it. During training, it's shown "The capital of France is ___" and learns that "Paris" is a very likely next word. Do this across trillions of words, and something surprising happens: to get good at predicting the next word, the model is forced to absorb grammar, facts, reasoning patterns, coding conventions, and the structure of arguments. Prediction, at massive scale, becomes something that <em>looks like</em> understanding.</p>
+
+  <p>When you chat with an LLM, it's not retrieving a stored answer. It's generating the response <strong>one token at a time</strong>, each time asking "given everything so far, what's the most likely next token?" — then adding it and repeating. The fluent paragraph you read was produced left-to-right, token by token, like an extraordinarily well-read autocomplete.</p>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Transformer</span>
+    <p>The <strong>Transformer</strong> is the specific neural-network architecture that made modern LLMs possible. Introduced in a 2017 Google paper called <em>"Attention Is All You Need,"</em> its key trick — <strong>attention</strong> — lets the model weigh which earlier words matter most when predicting the next one. The "GPT" in ChatGPT stands for <strong>Generative Pre-trained Transformer</strong>. You don't need to implement one, but you should know this is the engine under everything.</p>
+  </div>
+
+  <p>This "predict the next token" nature explains the single most important quirk you must respect in production:</p>
+
+  <div class="box warn">
+    <span class="lbl">Why It Matters ▸ Hallucination</span>
+    <p>Because an LLM generates the <em>statistically plausible</em> next token — not the <em>true</em> one — it will sometimes produce fluent, confident text that is simply wrong. A fabricated citation, a non-existent function, a made-up statistic. This is called a <strong>hallucination</strong>, and it is not a bug that will be fully "fixed" — it's a direct consequence of how the technology works. A huge part of production AI (and of your project) exists <em>because</em> of this: everything around the model has to catch, constrain, and observe it. Keep this in mind through the whole book.</p>
+  </div>
+
+  <div class="analogy">An LLM is like a brilliant improv actor who has read everything and will never break character to say "I don't know." Ask a confident question and you'll get a confident answer — beautifully delivered, usually right, occasionally invented. Your job in production is to be the director who checks the script.</div>
+
+  <div class="box try">
+    <span class="lbl">Try This ▸</span>
+    <p>Open any chatbot and ask it for "three peer-reviewed papers about [some very narrow topic] with authors and years." Then check whether they exist. You'll likely catch a hallucination in the wild — and understand viscerally why the observability layer you're building matters.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>Jay Alammar — "The Illustrated Transformer"</strong> (jalammar.github.io). Famous, visual, beginner-friendly explanation of the architecture.</li>
+      <li><strong>Andrej Karpathy — "Intro to Large Language Models"</strong> (YouTube, ~1 hr). The best single overview of what an LLM is, for a general audience.</li>
+      <li><strong>"Attention Is All You Need"</strong> (Vaswani et al., 2017) — the original Transformer paper. Skim it once just to have seen it.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH4 -->
+<article class="chap" id="c4">
+  <div class="ctag">Chapter 04</div>
+  <h3>The Vocabulary: Tokens, Parameters, Context, Temperature</h3>
+
+  <p>These four words appear in every LLM conversation, every pricing page, and every API. Your project literally measures some of them. Learn them once, here.</p>
+
+  <h4>Tokens</h4>
+  <p>Models don't read words or letters — they read <strong>tokens</strong>, which are chunks of text. A token is roughly ¾ of a word on average. "Hello" is one token; "unbelievable" might be three ("un," "believ," "able"). The rough rule of thumb: <strong>~4 characters ≈ 1 token</strong>, or ~750 words ≈ 1000 tokens.</p>
+  <p>Why you care: <strong>you pay per token</strong>, in and out. Every API bills by input tokens (your prompt) plus output tokens (the response). This is exactly why your control plane records <code>prompt_tokens</code> and <code>completion_tokens</code> — tokens are the unit of cost.</p>
+
+  <h4>Context Window</h4>
+  <p>The <strong>context window</strong> is the maximum number of tokens a model can "see" at once — your prompt plus its answer plus any documents you stuffed in. Early models had ~4,000 tokens (a few pages). By 2026, models routinely handle 128,000 to over 1,000,000 tokens (whole books). When people debate "is RAG dead because context windows got huge?" — this is the number they're arguing about (Chapter 8 settles that debate).</p>
+
+  <h4>Parameters</h4>
+  <p>Covered in Chapter 2 — the count of tuned numbers, the rough "size" of a model. In 2026 you'll see everything from tiny 1–3 billion parameter models that run on a laptop, to giant frontier models. Bigger isn't always better for a given job — a key production skill is matching model size to task (your "routing" feature).</p>
+
+  <h4>Temperature</h4>
+  <p><strong>Temperature</strong> is a dial (usually 0 to ~1) that controls randomness. At <strong>temperature 0</strong>, the model always picks the most likely next token — deterministic, focused, best for factual tasks and code. At <strong>higher temperature</strong>, it samples more adventurously — more creative, more varied, better for brainstorming. Same prompt, temperature 0.9, run twice, gives two different answers. (This is also why testing LLM apps is hard — Chapter 15.)</p>
+
+  <div class="tw">
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th><th>Why it matters to you</th></tr>
+      <tr><td>Token</td><td>A chunk of text (~¾ word)</td><td>The unit of cost and of context</td></tr>
+      <tr><td>Context window</td><td>Max tokens the model sees at once</td><td>Limits how much you can feed it</td></tr>
+      <tr><td>Parameters</td><td>Count of tuned numbers ("size")</td><td>Bigger = more capable + more costly</td></tr>
+      <tr><td>Temperature</td><td>Randomness dial</td><td>Low for facts, high for creativity</td></tr>
+    </table>
+  </div>
+
+  <div class="box try">
+    <span class="lbl">Try This ▸</span>
+    <p>Search "OpenAI tokenizer" and paste a sentence in. Watch it split into tokens and count them. Then look at any model's pricing page and multiply — you'll see exactly how a "cheap per token" price becomes real money at scale. That gap is the business case for your whole project.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH5 -->
+<article class="chap" id="c5">
+  <div class="ctag">Chapter 05</div>
+  <h3>The Models and the Companies Behind Them</h3>
+
+  <p>The landscape splits into two camps, and knowing the difference is essential because your gateway routes across <em>both</em>.</p>
+
+  <h4>Closed / proprietary models (API-only)</h4>
+  <p>You don't get the model file; you send requests to the company's servers and pay per token. The big three:</p>
+  <ul>
+    <li><strong>OpenAI</strong> — the GPT family (GPT-4, and by 2026 the GPT-5 line). The most famous; ChatGPT is theirs.</li>
+    <li><strong>Anthropic</strong> — the Claude family. Known for long context, strong coding, and a safety focus. (The provider your project already calls.)</li>
+    <li><strong>Google</strong> — the Gemini family. Deeply multimodal, huge context windows.</li>
+  </ul>
+
+  <h4>Open-weight models (you can download and run them)</h4>
+  <p>The weights are public, so you can run them on your own hardware — private, no per-token fee, but you provide the compute. The major families you'll hear about:</p>
+  <ul>
+    <li><strong>Meta's Llama</strong> — the family that kicked off the open-model wave.</li>
+    <li><strong>Mistral</strong> (France), <strong>Qwen</strong> (Alibaba), and <strong>DeepSeek</strong> (China) — all shipping strong open models, with DeepSeek in particular known for efficiency breakthroughs.</li>
+  </ul>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Ollama</span>
+    <p><strong>Ollama</strong> is a tool that makes running open-weight models on your own machine as easy as one command. It runs <em>one</em> model locally. This is worth knowing precisely because it clarifies what your project is <em>not</em>: Ollama is a single kitchen; your control plane is the layer that sits in front of many kitchens (Ollama, OpenAI, Anthropic) and manages the traffic to all of them.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Hugging Face</span>
+    <p><strong>Hugging Face</strong> is the "GitHub of models" — a giant hub where open models, datasets, and demos are shared. If open-weight models are a thing you touch, you'll download them from here. Their free courses are also some of the best learning material available.</p>
+  </div>
+
+  <div class="box next">
+    <span class="lbl">What's Next ▸</span>
+    <p>The 2026 trend isn't just "bigger." It's (a) <strong>reasoning models</strong> that "think" before answering, (b) <strong>small, efficient models</strong> good enough to run on phones and laptops, and (c) <strong>Mixture-of-Experts (MoE)</strong> designs that are huge in total but only activate a fraction per query, cutting cost. Chapters 19–20 cover the frontier in depth.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>Hugging Face</strong> (huggingface.co) and its <strong>LLM / NLP course</strong> (huggingface.co/learn).</li>
+      <li><strong>r/LocalLLaMA</strong> (Reddit) — the pulse of the open-model community. Where new releases are dissected first.</li>
+      <li><strong>The Batch</strong> by DeepLearning.AI and <strong>Latent Space</strong> (latent.space) — weekly signal on who shipped what.</li>
+    </ul>
+  </div>
+</article>
+
+<!-- ===================== PART II ===================== -->
+<section class="part" id="p2">
+  <div class="pnum">Part II</div>
+  <h2>Making Models Useful</h2>
+  <p>A raw model is a brain in a jar. This part is about the techniques that connect it to real information and real actions — prompting, retrieval, and agents — the layer your control plane sits in front of.</p>
+</section>
+
+<!-- CH6 -->
+<article class="chap" id="c6">
+  <div class="ctag">Chapter 06</div>
+  <h3>Prompting and Prompt Engineering</h3>
+
+  <p>A <strong>prompt</strong> is simply the text you send the model. <strong>Prompt engineering</strong> is the craft of writing that text so you reliably get what you want. It sounds trivial; it isn't, because the model has no memory of you and no goal of its own — it only has the words in front of it right now.</p>
+
+  <p>A few durable techniques that consistently help:</p>
+  <ul>
+    <li><strong>Be specific and give a role.</strong> "You are a senior tax accountant. Explain X to a small-business owner in 3 short paragraphs." beats "explain X."</li>
+    <li><strong>Give examples (few-shot).</strong> Showing the model 2–3 examples of the input→output you want ("few-shot prompting") dramatically improves consistency versus describing it ("zero-shot").</li>
+    <li><strong>Ask it to reason step by step (chain-of-thought).</strong> For anything involving logic or math, telling the model to "work through it step by step" before answering measurably improves accuracy, because it generates intermediate reasoning tokens instead of blurting a guess.</li>
+    <li><strong>Specify the format.</strong> "Return JSON with keys <code>name</code> and <code>score</code>" gives you something a program can parse.</li>
+  </ul>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ System Prompt</span>
+    <p>The <strong>system prompt</strong> is a special instruction, set by the developer (not the end user), that frames the model's behavior for the whole conversation — its persona, rules, and boundaries. When you build an LLM feature, the system prompt is where you encode "who" the assistant is. It's invisible to the user but shapes every response.</p>
+  </div>
+
+  <div class="box next">
+    <span class="lbl">What's Next ▸ Context Engineering</span>
+    <p>In 2026 the field is shifting language from "prompt engineering" to <strong>context engineering</strong> — the broader discipline of assembling <em>everything</em> the model sees at inference time: the system prompt, retrieved documents, tool outputs, conversation history, and memory, all budgeted carefully within the context window. It's prompt engineering grown up into a systems problem. Worth knowing the term; you'll see it a lot.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>Anthropic's prompt engineering docs</strong> (docs.anthropic.com) and <strong>OpenAI's prompting guide</strong> (platform.openai.com/docs) — both practical and free.</li>
+      <li><strong>Lilian Weng — "Prompt Engineering"</strong> (lilianweng.github.io). Weng is a respected AI researcher; her blog is a beloved deep-dive resource.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH7 -->
+<article class="chap" id="c7">
+  <div class="ctag">Chapter 07</div>
+  <h3>Embeddings and Vector Search</h3>
+
+  <p>This chapter unlocks the next one (RAG), and it's one of the most genuinely useful concepts in the whole field. Slow down here.</p>
+
+  <p>An <strong>embedding</strong> is a way of turning a piece of text into a list of numbers (a <strong>vector</strong>) that captures its <em>meaning</em>. The crucial property: <strong>texts with similar meaning get similar vectors.</strong> "dog," "puppy," and "canine" land close together in this number-space; "spreadsheet" lands far away.</p>
+
+  <div class="analogy">Imagine a vast library where books aren't shelved alphabetically but by <em>meaning</em> — every book about grief is in one corner, every book about baking in another, and a book about "the comfort of baking after loss" sits somewhere between them. An embedding is the coordinate of a piece of text in that meaning-space. Vector search is walking to a spot and grabbing the nearest neighbors.</div>
+
+  <p>Once your text is embedded into vectors, you can do <strong>semantic search</strong>: take a question, embed it, and find the stored texts whose vectors are nearest. Unlike keyword search, this finds relevant results even when they share no words — a search for "how do I cancel" can retrieve a document titled "Ending your subscription."</p>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Vector Database</span>
+    <p>A <strong>vector database</strong> is a database built to store millions of these vectors and find nearest neighbors fast. Common ones you'll hear: <strong>Chroma</strong> (simple, local, great for learning), <strong>Qdrant</strong>, <strong>Weaviate</strong>, <strong>Pinecone</strong> (hosted), and <strong>pgvector</strong> (adds vectors to ordinary PostgreSQL). This is the storage engine underneath most RAG systems.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Connect to Your Project ▸</span>
+    <p>Remember the <strong>semantic caching</strong> feature on your roadmap? This is the mechanism. When a new request arrives, you embed it and check whether a <em>semantically similar</em> request was already answered — if so, you return the cached answer instead of paying for the model again. Embeddings are how "similar" is measured. You now understand the clever part of your own gateway.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>Cohere's "What Are Embeddings?"</strong> and <strong>Chroma's docs</strong> (trychroma.com) — both approachable.</li>
+      <li><strong>Simon Willison — "Embeddings: What they are and why they matter"</strong> (simonwillison.net). Clear, practical, widely recommended.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH8 -->
+<article class="chap" id="c8">
+  <div class="ctag">Chapter 08</div>
+  <h3>RAG — Retrieval-Augmented Generation</h3>
+
+  <p>You asked specifically what RAG is. Here's the whole thing, and it's simpler than the acronym suggests.</p>
+
+  <p><strong>The problem RAG solves:</strong> An LLM only knows what was in its training data, which has a cutoff date and contains none of your private documents. Ask it about your company's internal refund policy and it will either say it doesn't know or — worse — hallucinate a plausible-sounding wrong answer.</p>
+
+  <p><strong>Retrieval-Augmented Generation (RAG)</strong> fixes this by <em>fetching relevant information first, then asking the model to answer using it.</em> The flow:</p>
+  <ol>
+    <li><strong>Ingest (once):</strong> Take your documents, split them into chunks, embed each chunk (Chapter 7), and store the vectors in a vector database.</li>
+    <li><strong>Retrieve (per question):</strong> When a user asks something, embed their question and pull the most similar chunks from the vector DB.</li>
+    <li><strong>Augment + Generate:</strong> Paste those chunks into the prompt ("Answer using this context: …") and let the model write the answer, now grounded in real, retrieved facts.</li>
+  </ol>
+
+  <div class="analogy">RAG is an open-book exam. Instead of forcing the model to answer from memory (closed-book, prone to making things up), you first hand it the exact pages it needs and say "answer from these." The model's fluency plus your facts = grounded answers.</div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Chunking</span>
+    <p><strong>Chunking</strong> is splitting documents into bite-sized pieces before embedding. Get it wrong (chunks too big, too small, or split mid-sentence) and retrieval quality collapses — the #1 practical reason RAG systems underperform. It's unglamorous plumbing, which is exactly why it's real engineering work companies hire for.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Grounding & Faithfulness</span>
+    <p>An answer is <strong>grounded</strong> if it's actually supported by the retrieved documents. <strong>Faithfulness</strong> is the measure of whether the model stuck to the provided context instead of wandering off into its own memory. These are the specific things production RAG systems monitor — and, notably, the one hallucination problem that <em>is</em> checkable, because you have the source documents to check against (this matters in Chapter 15).</p>
+  </div>
+
+  <div class="box warn">
+    <span class="lbl">Settling the Debate ▸ "Is RAG dead?"</span>
+    <p>You'll hear this claim every time context windows get bigger ("just paste all your docs in, no retrieval needed"). The honest 2026 answer: the <em>naive</em> "vector-search-over-PDFs" tutorial version is fading, but the underlying discipline is very much alive — it's evolving into <strong>context engineering</strong> and <strong>agentic retrieval</strong> (where the model decides what to look up, when). Retrieval didn't die; it grew up and got a new name. Feeding a model the right information at the right time is a permanent problem. Don't let the headline scare you off the concept.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>The original RAG paper</strong> (Lewis et al., 2020) — worth knowing it exists.</li>
+      <li><strong>LlamaIndex</strong> (docs.llamaindex.ai) and <strong>LangChain</strong> (python.langchain.com) — the two most common frameworks for building RAG. Their docs double as tutorials.</li>
+      <li><strong>Anthropic — "Contextual Retrieval"</strong> (on their blog) — a modern, practical improvement on classic RAG.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH9 -->
+<article class="chap" id="c9">
+  <div class="ctag">Chapter 09</div>
+  <h3>Agents, Tools, and MCP</h3>
+
+  <p>So far the model only talks. An <strong>agent</strong> is an LLM that can also <em>act</em> — it can use tools, take multiple steps, and pursue a goal with some autonomy.</p>
+
+  <p>The mechanism is <strong>tool use</strong> (also called <strong>function calling</strong>). You tell the model "here are some tools you can use: <code>search_web(query)</code>, <code>send_email(to, body)</code>, <code>query_database(sql)</code>." When the model decides it needs one, instead of answering in prose, it outputs a structured request to call that tool. Your code runs the tool, hands the result back, and the model continues. Chain these together and the model can research, calculate, book, and build — not just chat.</p>
+
+  <div class="analogy">A plain LLM is a knowledgeable person locked in a room with no phone. An agent is that same person given a phone, a web browser, and a to-do list. Same brain — but now it can look things up, take actions, and check its own work across several steps.</div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ MCP (Model Context Protocol)</span>
+    <p><strong>MCP</strong> is a 2024–2026 open standard (originated by Anthropic, now broadly adopted and stewarded under the Linux Foundation) for connecting AI models to tools and data sources in a uniform way. Before MCP, every tool needed custom glue for every model. MCP is like <strong>USB for AI tools</strong>: build a tool once as an "MCP server," and any MCP-compatible model can use it. By 2026 there are thousands of public MCP servers. This is one of the most important pieces of modern AI plumbing to know by name.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Multi-Agent Systems</span>
+    <p>Sometimes you use <em>several</em> agents that talk to each other — a "planner" that breaks work into steps, "workers" that each handle one, a "reviewer" that checks results. Powerful, but fragile: errors can cascade from one agent to the next. Making multi-agent systems reliable is an active frontier (and a place lots of tooling is being built).</p>
+  </div>
+
+  <div class="box next">
+    <span class="lbl">What's Next ▸</span>
+    <p>2026's biggest story is the shift from chatbots to <strong>agents that do real work</strong> — "computer use" agents that operate a browser or desktop, coding agents that fix real bugs, and emerging <strong>agent-to-agent</strong> protocols and even agent payment standards. The infrastructure to run, secure, and observe agents (your neighborhood) is being built right now.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>Anthropic — "Building effective agents"</strong> (on their blog/docs). A clear, hype-free guide to agent patterns.</li>
+      <li><strong>Model Context Protocol</strong> (modelcontextprotocol.io) — the official MCP site and docs.</li>
+      <li><strong>Lilian Weng — "LLM-Powered Autonomous Agents"</strong> (lilianweng.github.io). The canonical deep dive.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH10 -->
+<article class="chap" id="c10">
+  <div class="ctag">Chapter 10</div>
+  <h3>Fine-Tuning vs RAG vs Prompting</h3>
+
+  <p>Newcomers constantly ask "should I fine-tune a model?" Usually the answer is no, and knowing why is a mark of someone who actually understands the field. Here are the three ways to make a model do what you want, cheapest first.</p>
+
+  <div class="tw">
+    <table>
+      <tr><th>Approach</th><th>What it is</th><th>Best for</th><th>Cost / effort</th></tr>
+      <tr><td><strong>Prompting</strong></td><td>Just write better instructions/examples</td><td>Most tasks. Always try this first.</td><td>Lowest</td></tr>
+      <tr><td><strong>RAG</strong></td><td>Fetch relevant info, then answer</td><td>Giving the model private/current <em>knowledge</em></td><td>Medium</td></tr>
+      <tr><td><strong>Fine-tuning</strong></td><td>Further-train the model on your examples to change its <em>behavior/style</em></td><td>Consistent format, tone, or a narrow skill — not new facts</td><td>Highest</td></tr>
+    </table>
+  </div>
+
+  <p>The key mental model: <strong>RAG gives a model new <em>knowledge</em>; fine-tuning gives it a new <em>behavior</em>.</strong> If your problem is "it doesn't know our internal docs," that's RAG. If it's "it won't consistently reply in our exact format/voice," that might be fine-tuning. If it's "it's not following instructions well," that's usually just better prompting. People reach for expensive fine-tuning when cheap prompting or RAG would have solved it.</p>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ LoRA / PEFT</span>
+    <p>Full fine-tuning (re-tuning all the weights) is enormously expensive. <strong>LoRA</strong> (Low-Rank Adaptation), a type of <strong>PEFT</strong> (Parameter-Efficient Fine-Tuning), is the practical alternative: it freezes the big model and trains a tiny "adapter" on top. This is how fine-tuning is actually done in practice — cheaply, on modest hardware. Know the acronym.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>Hugging Face PEFT docs</strong> and their fine-tuning tutorials (huggingface.co).</li>
+      <li><strong>OpenAI / Anthropic fine-tuning guides</strong> — for when you genuinely need it.</li>
+    </ul>
+  </div>
+</article>
+
+<!-- ===================== PART III ===================== -->
+<section class="part" id="p3">
+  <div class="pnum">Part III</div>
+  <h2>Running AI in Production</h2>
+  <p>This is home. Everything so far was about making a model <em>work</em>; this part is about making it work <em>reliably, at scale, for real users, without surprises</em> — which is the actual job, and the exact space your project and your target roles live in.</p>
+</section>
+
+<!-- CH11 -->
+<article class="chap" id="c11">
+  <div class="ctag">Chapter 11</div>
+  <h3>Why Production AI Is Hard</h3>
+
+  <p>Traditional software is deterministic: same input, same output, every time. If it breaks, you get an error and a stack trace pointing at the line. LLM-powered software breaks all of those comfortable assumptions, and understanding <em>how</em> is the foundation of everything that follows.</p>
+
+  <ul>
+    <li><strong>It's non-deterministic.</strong> The same prompt can give different answers (especially above temperature 0). You can't write a simple "assert output == expected" test.</li>
+    <li><strong>It fails silently.</strong> When a normal service breaks, it throws an error. When an LLM "breaks," it returns a clean, confident, well-formatted answer that happens to be <em>wrong</em>. No exception, no red flag — just a plausible mistake sailing through to your user.</li>
+    <li><strong>Cost is variable and can spike.</strong> Every request costs money, and a long conversation or a runaway agent can quietly rack up a huge bill.</li>
+    <li><strong>Latency is high and variable.</strong> Model calls take hundreds of milliseconds to many seconds, and depend on someone else's servers.</li>
+    <li><strong>You depend on external providers.</strong> If OpenAI has an outage, your product goes down — unless you built a way to fail over.</li>
+  </ul>
+
+  <div class="box">
+    <span class="lbl">The Core Insight ▸</span>
+    <p>Every one of these problems is solved not by the model, but by the <strong>infrastructure around the model</strong>. Non-determinism → you need <em>evaluation</em>. Silent failure → you need <em>observability</em>. Cost spikes → you need <em>tracking and limits</em>. Provider outages → you need <em>routing and failover</em>. This list <em>is</em> the feature list of your control plane. You're not building a random project — you're building the answer to why production AI is hard.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>Chip Huyen — "AI Engineering"</strong> (2025 book) and <strong>"Designing Machine Learning Systems"</strong> — the definitive books on exactly this. If you read one thing on this topic, read Huyen.</li>
+      <li><strong>Eugene Yan's blog</strong> (eugeneyan.com) — battle-tested applied-LLM writing from industry.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH12 -->
+<article class="chap" id="c12">
+  <div class="ctag">Chapter 12</div>
+  <h3>Telemetry and Observability</h3>
+
+  <p>You asked what telemetry is. This is the concept your entire project is built around, so let's do it properly.</p>
+
+  <p><strong>Telemetry</strong> is data a system emits about what it's doing — measurements sent from inside the running system so you can see its behavior from outside. The word comes from "tele" (remote) + "metry" (measurement): measuring something remotely. Every time your gateway records a request's latency, tokens, and cost, it is <em>emitting telemetry</em>.</p>
+
+  <p><strong>Observability</strong> is the broader goal telemetry serves: the ability to understand what's happening inside a system just from the signals it emits — <em>especially</em> to answer questions you didn't know you'd need to ask. A system is "observable" if, when something goes wrong, you can figure out why without adding new code.</p>
+
+  <div class="analogy">Telemetry is the sensors in a car — speed, fuel, engine temperature, tire pressure. Observability is the dashboard and warning lights that turn those raw sensor readings into "you can tell what's happening and catch a problem before the engine dies." You're building the dashboard for LLM apps.</div>
+
+  <p>Observability traditionally rests on <strong>three pillars</strong> — learn these three words, they're everywhere in infra:</p>
+  <ul>
+    <li><strong>Logs</strong> — timestamped records of individual events ("request X failed at 10:03"). Detailed, high-volume.</li>
+    <li><strong>Metrics</strong> — numbers aggregated over time ("average latency this hour," "requests per second"). Cheap, great for dashboards and alerts. Your <code>/telemetry/summary</code> endpoint produces metrics.</li>
+    <li><strong>Traces</strong> — the full journey of a single request as it moves through the system, step by step. Essential when one user request touches many services (or, in AI, many model/tool calls).</li>
+  </ul>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ OpenTelemetry (OTel)</span>
+    <p><strong>OpenTelemetry</strong> is the open, vendor-neutral industry standard for generating and collecting telemetry (logs, metrics, traces). It's a CNCF project, used across the whole cloud industry — not just AI. If your project speaks OpenTelemetry, it plugs into every observability tool that exists, and "OpenTelemetry" on your résumé signals real platform maturity. It's on your roadmap for exactly this reason.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ LLM Observability</span>
+    <p>Generic observability tracks latency and errors. <strong>LLM observability</strong> adds the AI-specific signals: token counts, cost per call, which model/provider served it, prompt and response capture, cache hit/miss, and quality signals like faithfulness. Tools in this space (Langfuse — open-source, Arize Phoenix, LangSmith, and others) are the commercial cousins of what you're building. Knowing they exist lets you say in an interview "mine is a focused, self-hostable take on what Langfuse does."</p>
+  </div>
+
+  <div class="box try">
+    <span class="lbl">Try This ▸</span>
+    <p>Look back at your own <code>telemetry.py</code>. Identify which of the three pillars each part maps to: the per-request records are <em>logs</em>, the <code>summary()</code> aggregates are <em>metrics</em>, and the per-request timing is the seed of a <em>trace</em>. You built all three pillars in miniature without knowing the vocabulary. Now you have the words.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>OpenTelemetry docs</strong> (opentelemetry.io) — start with "Observability Primer."</li>
+      <li><strong>Langfuse docs</strong> (langfuse.com) — the leading open-source LLM observability tool; great for seeing what a mature version of your project looks like.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH13 -->
+<article class="chap" id="c13">
+  <div class="ctag">Chapter 13</div>
+  <h3>MLOps</h3>
+
+  <p><strong>MLOps</strong> (Machine Learning Operations) is DevOps applied to machine learning: the practices and tools for reliably taking ML models from a notebook into production and keeping them healthy there. If "DevOps" is how you ship and run software reliably, "MLOps" is how you ship and run <em>models</em> reliably — which is harder, because models also depend on data, and data changes.</p>
+
+  <p>The core MLOps concerns:</p>
+  <ul>
+    <li><strong>Versioning</strong> — not just code, but data and models too. You must be able to reproduce exactly which data + which code produced which model.</li>
+    <li><strong>Pipelines</strong> — automated flows for training, testing, and deploying models (so it's not a human running scripts by hand).</li>
+    <li><strong>Deployment & serving</strong> — packaging a model behind an API so applications can call it.</li>
+    <li><strong>Monitoring</strong> — watching the model in production for degradation.</li>
+    <li><strong>CI/CD for ML</strong> — continuous integration/deployment adapted so that a drop in model quality can block a release, just like a failing test would.</li>
+  </ul>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Drift</span>
+    <p><strong>Drift</strong> is the quiet killer of ML systems. The world changes, so the live data starts to differ from the data the model was trained on, and accuracy silently decays. <strong>Data drift</strong> = the inputs change; <strong>model drift / concept drift</strong> = the relationship the model learned no longer holds. Detecting drift is a core MLOps job — and detecting the LLM-era equivalent (a provider silently changing their model, costs creeping up, latency degrading) is exactly the kind of alerting on your roadmap.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Experiment Tracking & Model Registry</span>
+    <p><strong>Experiment tracking</strong> (tools like <strong>MLflow</strong> and <strong>Weights &amp; Biases</strong>) records every training run — its settings and results — so you can compare and reproduce. A <strong>model registry</strong> is the versioned catalog of trained models with their stage (dev / staging / production). Together they're the "source control for models."</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>Made With ML</strong> by Goku Mohandas (madewithml.com) — a superb, free, end-to-end MLOps course. Highly recommended for your exact goal.</li>
+      <li><strong>Google Cloud — "MLOps: Continuous delivery and automation pipelines in ML"</strong> — the canonical maturity-levels article.</li>
+      <li><strong>MLflow docs</strong> (mlflow.org).</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH14 -->
+<article class="chap" id="c14">
+  <div class="ctag">Chapter 14</div>
+  <h3>LLMOps (and how it differs)</h3>
+
+  <p><strong>LLMOps</strong> is MLOps specialized for large language models. It exists as its own term because LLMs broke several MLOps assumptions. The biggest difference: in classic MLOps, <em>you</em> usually train the model, so the model is the thing you version and manage. In LLMOps, you often <em>don't</em> train the model at all — you call someone else's (OpenAI's, Anthropic's) — so the things you manage shift.</p>
+
+  <div class="tw">
+    <table>
+      <tr><th>Concern</th><th>Classic MLOps</th><th>LLMOps</th></tr>
+      <tr><td>The core asset you manage</td><td>Your trained model</td><td>Prompts, context, and the pipeline around a called model</td></tr>
+      <tr><td>Versioning</td><td>Data + model weights</td><td>Prompts, retrieval config, model <em>choice</em></td></tr>
+      <tr><td>Main cost</td><td>Training compute</td><td>Per-token inference cost (every request)</td></tr>
+      <tr><td>Evaluation</td><td>Accuracy vs labels</td><td>Fuzzy quality: helpfulness, faithfulness, safety (Ch. 15)</td></tr>
+      <tr><td>Failure mode</td><td>Wrong prediction</td><td>Hallucination, prompt injection, silent quality drops</td></tr>
+    </table>
+  </div>
+
+  <p>So a modern <strong>LLMOps platform</strong> — the category your project belongs to — is the operational layer around LLM applications. It typically covers: <strong>observability</strong> (Ch. 12), <strong>evaluation</strong> (Ch. 15), <strong>cost tracking &amp; limits</strong>, <strong>prompt/version management</strong>, <strong>routing &amp; failover</strong>, and <strong>guardrails</strong> (Ch. 16). No small team builds <em>all</em> of that at once — which is why your project sensibly picks a spine (deploy + observe + manage) and grows outward.</p>
+
+  <div class="box">
+    <span class="lbl">Connect to Your Project ▸</span>
+    <p>When an interviewer asks "what is this project?", the crisp answer is: <em>"A self-hostable LLMOps control plane. It sits in front of LLM applications and gives you observability — latency, token, and cost telemetry per request — plus operational alerting and per-app management, deployed as infrastructure-as-code."</em> Every noun in that sentence is a concept from this book, and every one is a real thing companies hire for.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li>Search <strong>"LLMOps"</strong> on the <strong>Hugging Face blog</strong> and <strong>Databricks / Weights &amp; Biases blogs</strong> — several strong primers.</li>
+      <li><strong>"Emerging Architectures for LLM Applications"</strong> (a16z) — a widely-shared map of the whole LLM app stack.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH15 -->
+<article class="chap" id="c15">
+  <div class="ctag">Chapter 15</div>
+  <h3>Evaluation — How You Know It's Working</h3>
+
+  <p>This is the deepest, most important, and least-solved problem in production AI — and understanding it honestly separates people who <em>get</em> this field from people who don't. The core question sounds trivial: <strong>how do you know if the model's output is good?</strong></p>
+
+  <p>In traditional ML, you have a test set with known right answers, so you measure <strong>accuracy</strong> directly. With open-ended LLM output ("write me a strategy," "summarize this"), there often <em>is no single right answer</em> to check against. So the field uses a toolbox of imperfect methods, each catching different failures:</p>
+
+  <ul>
+    <li><strong>Reference-based metrics</strong> (BLEU, ROUGE) — compare output to a "gold" answer by word overlap. Cheap, but crude; punishes valid answers that use different words.</li>
+    <li><strong>Human evaluation</strong> — people rate outputs. The gold standard for quality, but slow and expensive; doesn't scale to production traffic.</li>
+    <li><strong>LLM-as-a-judge</strong> — use a strong LLM to grade another LLM's output against a rubric. Scalable and surprisingly effective; the workhorse of modern evals. But it has a circularity problem (who judges the judge?) and its own biases.</li>
+    <li><strong>Self-consistency</strong> — run the same prompt several times; if answers wildly disagree, that instability is itself a warning sign. Costs extra calls.</li>
+    <li><strong>Task-specific / code checks</strong> — where an objective check exists (does the JSON parse? does the generated code pass tests? is the answer <em>faithful</em> to retrieved docs?), use it. The most reliable option — when available.</li>
+  </ul>
+
+  <div class="box warn">
+    <span class="lbl">The Honest Truth ▸</span>
+    <p>For <strong>grounded</strong> tasks (RAG, where you have source documents), evaluation is largely solved: you check faithfulness against the sources, often with a small fast "judge" model. For <strong>open-ended</strong> tasks with no ground truth, there is <em>no</em> fully reliable automated way to know an answer is correct — the state of the art is a portfolio of the imperfect signals above. Anyone who tells you they've "solved" open-ended eval is overselling. Knowing this boundary precisely is genuine expertise, and it explains why "evaluation" is one of the hottest, most-hired skills in AI right now.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Eval / Eval Set</span>
+    <p>An <strong>eval</strong> is a test for an AI system; an <strong>eval set</strong> (or "golden set") is a curated collection of inputs — and, where possible, ideal outputs — you run your system against to measure quality and catch regressions before shipping. Building good eval sets is one of the highest-leverage, most underrated skills in the field.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Guardrails</span>
+    <p>Distinct from evaluation: <strong>guardrails</strong> are real-time checks that answer "is this allowed?" — blocking toxic content, catching <strong>prompt injection</strong> (malicious instructions hidden in inputs), and preventing sensitive-data leaks. Evaluation asks "is it good?"; guardrails ask "is it safe?" Both often live in the same layer your control plane sits in.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li>
+        <strong>"Your AI Product Needs Evals"</strong> by Hamel Husain (hamel.dev) — the most-recommended practical article on evals, full stop.
+        <div style="margin-top: 10px; margin-bottom: 12px; padding-left: 14px; border-left: 2px solid var(--rule); font-size: 15.5px; line-height: 1.6;">
+          <div style="font-weight: 700; color: var(--ink); margin-bottom: 6px;">Core Takeaways</div>
+          <ul style="margin: 0 0 12px 18px; padding-left: 0;">
+            <li><strong>Iteration Speed Determines Success:</strong> The root cause of most failed AI products is the lack of a robust evaluation system. Streamlining how you evaluate quality and debug issues allows you to iterate and change behavior quickly.</li>
+            <li><strong>A Tiered Approach to Evaluation:</strong> Evaluations should be structured into three distinct levels: Unit Tests (Level 1), Human &amp; Model Eval (Level 2), and A/B Testing (Level 3).</li>
+            <li><strong>Evals Unlock Superpowers:</strong> Once you build a strong evaluation pipeline, it naturally doubles as a high-quality data generation and curation engine, making future model fine-tuning much easier.</li>
+          </ul>
+
+          <div style="font-weight: 700; color: var(--ink); margin-bottom: 6px;">What You Need to Know as a Developer / LLMOps Engineer</div>
+          <ul style="margin: 0 0 6px 18px; padding-left: 0;">
+            <li><strong>Implement Deterministic "Level 1" Unit Tests:</strong> Do not rely entirely on "vibe checks" or complex LLM judges for everything. Write fast, cheap assertions (e.g., using regex to ensure a UUID is not exposed, or asserting the length of an array) and run them in your CI pipelines on every code change.</li>
+            <li><strong>Bootstrap with Synthetic Test Cases:</strong> You don't need to wait for live production traffic to test your system. Use LLMs to generate 50+ synthetic test inputs for every feature and scenario, then run your unit tests against those inputs.</li>
+            <li><strong>Log Your Traces:</strong> Tracing the exact sequence of events (e.g., user input → RAG retrieval → AI response) is a prerequisite for debugging. Use dedicated tracing tools like LangSmith to capture this telemetry.</li>
+            <li><strong>Build Custom Domain-Specific Viewing Tools:</strong> Looking at raw JSON logs adds friction. As an engineer, you should spend the time to build lightweight internal tools (using frameworks like Streamlit or Shiny) that pull your traces, CRM/database records, and labeling interfaces into a single, cohesive view.</li>
+            <li><strong>Treat "LLM-as-a-Judge" as a Meta-Problem:</strong> When using LLMs for automated evaluation, use the most powerful model you can afford. More importantly, you must actively align the evaluator model's critiques with human consensus, and track its performance using precision and recall metrics rather than just raw agreement.</li>
+          </ul>
+        </div>
+      </li>
+      <li><strong>RAGAS</strong> (docs.ragas.io) — a popular framework for evaluating RAG systems (faithfulness, relevance).</li>
+      <li><strong>OpenAI Evals</strong> (github.com/openai/evals) — an open framework and examples.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH16 -->
+<article class="chap" id="c16">
+  <div class="ctag">Chapter 16</div>
+  <h3>The Infra Layer: Gateways, Caching, Routing, Guardrails</h3>
+
+  <p>This chapter is the direct blueprint of your project. Each of these is a component of the layer that sits between an application and the models it uses.</p>
+
+  <h4>The Gateway (a.k.a. AI gateway / LLM proxy)</h4>
+  <p>A <strong>gateway</strong> is a single entry point that all model requests flow through. The app talks to the gateway; the gateway talks to the providers. This one architectural choice is what makes everything else possible — because now there's a single place to add caching, limits, logging, and failover. Existing examples: LiteLLM (open-source), Portkey, Cloudflare AI Gateway, Kong AI Gateway.</p>
+
+  <h4>Caching</h4>
+  <p><strong>Caching</strong> stores answers to avoid recomputing them. <strong>Exact-match caching</strong> reuses the answer when the identical request repeats. <strong>Semantic caching</strong> (Ch. 7) goes further — it reuses the answer when a <em>similar</em> request arrives, measured by embeddings. Caching cuts both cost and latency, sometimes dramatically. It's the clever centerpiece of a good gateway.</p>
+
+  <h4>Routing</h4>
+  <p><strong>Routing</strong> decides <em>which</em> model handles each request. Send simple requests to a small cheap model and hard ones to a big capable model, and you cut costs without hurting quality. Routing also enables <strong>failover</strong>: if the primary provider errors or goes down, automatically retry on a backup — the difference between "our product is down because OpenAI is down" and "our users never noticed."</p>
+
+  <h4>Rate limiting &amp; budgets</h4>
+  <p><strong>Rate limiting</strong> caps how many requests a user/team can make in a window (protecting you from abuse and runaway costs); <strong>budgets</strong> cap spend. Both are usually enforced with a fast store like <strong>Redis</strong> (an in-memory database perfect for counters). This is core infra work — squarely your existing strength.</p>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Guardrails (in the pipeline)</span>
+    <p>As in Ch. 15 — the safety checkpoint. In a gateway, a request's journey becomes a pipeline: <em>authenticate → check budget/limits → run input guardrails → check cache → route to a provider → run output guardrails → record telemetry → return.</em> Seeing the request as this ordered pipeline is the mental model of the entire infra layer. Your control plane is an implementation of this pipeline, focused on the telemetry stage.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Mental Model ▸ REST APIs, Frameworks &amp; Modern Architecture</span>
+    <p><strong>REST API vs. Web Frameworks (FastAPI / Express / Spring Boot):</strong> A <strong>REST API</strong> is the architectural standard for software communication over HTTP (using <code>GET</code>, <code>POST</code>, and JSON payloads). Web frameworks like <strong>FastAPI</strong> (Python), <strong>Express.js</strong> / <strong>Fastify</strong> (Node.js), and <strong>Spring Boot</strong> (Java) serve as abstraction layers that "cover up" low-level HTTP networking, socket listening, and header parsing so developers only write business logic.</p>
+    <p style="margin-top: 8px;"><strong>Frontend (React) vs. Full-Stack (Next.js):</strong> Pure <strong>React</strong> is a browser-side UI library and cannot safely hold secret API keys or query databases. Server frameworks run on backend infrastructure. <strong>Next.js</strong> bridges both by integrating React UI with a built-in Node.js server for API routes.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li>
+        <strong>LiteLLM docs</strong> (docs.litellm.ai) — the most popular open-source gateway; the closest reference to your project. Read it to see every feature you might add.
+        <div style="margin-top: 10px; margin-bottom: 12px; padding-left: 14px; border-left: 2px solid var(--rule); font-size: 15.5px; line-height: 1.6;">
+          <div style="font-weight: 700; color: var(--ink); margin-bottom: 6px;">Key Takeaways: What is LiteLLM?</div>
+          <p style="margin-bottom: 8px; font-size: 15px;">LiteLLM is an open-source tool that standardizes how you interact with over 100 different Large Language Models (LLMs), such as OpenAI, Anthropic, Vertex AI, and Bedrock.</p>
+          <ul style="margin: 0 0 12px 18px; padding-left: 0;">
+            <li><strong>Unified Interface:</strong> Call any supported AI provider using the exact same <code>completion()</code> function without writing custom code for each API.</li>
+            <li><strong>Standardized Output:</strong> Guarantees that response formats match the standard OpenAI Chat Completions schema across all providers.</li>
+            <li><strong>Standardized Error Handling:</strong> Maps provider-specific errors (rate limits, bad keys) to standard OpenAI exception types out of the box.</li>
+            <li><strong>Resilience &amp; Routing:</strong> Features a built-in Router for load balancing, automatic retries, and provider fallbacks during outages.</li>
+            <li><strong>Cost &amp; Usage Tracking:</strong> Track spending across all providers and set up budget limits.</li>
+            <li><strong>Built-in Observability:</strong> Send input/output logs to platforms like Langfuse, MLflow, and Helicone with a single line of code.</li>
+            <li><strong>Agent &amp; MCP Gateway:</strong> Acts as a unified endpoint for LLMs, Agent-to-Agent (A2A) communication, and Model Context Protocol (MCP) tools.</li>
+          </ul>
+
+          <div style="font-weight: 700; color: var(--ink); margin-bottom: 6px;">How It Works: Architecture &amp; Data Flow</div>
+          <p style="margin-bottom: 8px; font-size: 15px;"><strong>The Core Flow:</strong> Developer/Client sends standard OpenAI request → LiteLLM Core (translates prompt, checks virtual keys &amp; budgets, routes request) → Endpoints (LLM APIs, MCP Tools, A2A Agents).</p>
+          <div style="font-weight: 700; color: var(--ink); margin-bottom: 4px; font-size: 14.5px;">The Two Deployment Paths:</div>
+          <ul style="margin: 0 0 6px 18px; padding-left: 0;">
+            <li><strong>Path 1: Python SDK (Application Integration):</strong> Drop-in replacement for OpenAI Python client integrated directly into your codebase to handle translation, streaming, and logging.</li>
+            <li><strong>Path 2: Proxy Server / LLM Gateway (Platform Teams):</strong> Self-hosted proxy sitting between apps and AI providers. Provides Centralized Admin UI, virtual keys, budget enforcement, and centralized logging guardrails with zero app code changes.</li>
+          </ul>
+        </div>
+      </li>
+      <li><strong>Cloudflare AI Gateway</strong> and <strong>Portkey</strong> docs — for how commercial gateways frame their features.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH17 -->
+<article class="chap" id="c17">
+  <div class="ctag">Chapter 17</div>
+  <h3>Shipping It: Docker, Kubernetes, Terraform, CI/CD</h3>
+
+  <p>This is the delivery layer — and it's the part of AI infra that is <em>most</em> like the cloud/DevOps skills you already have. These four tools are how any modern service (AI or not) gets deployed and run. Your project deploys with them, which is exactly why it plays to your strengths.</p>
+
+  <ul>
+    <li><strong>Docker (containers).</strong> A <strong>container</strong> packages your app with everything it needs to run — code, libraries, config — into a portable box that runs identically on your laptop, a server, or the cloud. "Works on my machine" problems disappear. A <strong>Dockerfile</strong> is the recipe for building that box.</li>
+    <li><strong>Kubernetes (K8s).</strong> When you have many containers across many machines, <strong>Kubernetes</strong> is the orchestrator that runs them — restarting crashed ones, scaling up under load, spreading traffic. It's the industry-standard control system for containerized apps at scale.</li>
+    <li><strong>Terraform (Infrastructure as Code).</strong> <strong>Terraform</strong> lets you define your infrastructure — servers, networks, databases — in text files, so standing up a whole environment is one command (<code>terraform apply</code>) instead of hours of manual clicking. This is <strong>Infrastructure as Code (IaC)</strong>: your infra is version-controlled, reviewable, and reproducible.</li>
+    <li><strong>CI/CD.</strong> <strong>Continuous Integration / Continuous Deployment</strong> is the automated pipeline that tests your code and ships it whenever you push a change — no manual deploys. Tools: GitHub Actions, GitLab CI, and others.</li>
+  </ul>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Helm</span>
+    <p><strong>Helm</strong> is "a package manager for Kubernetes." A <strong>Helm chart</strong> bundles all the Kubernetes configuration for an app into one installable, configurable package — so someone can deploy your whole control plane with a single command. It's on your roadmap because "deployable via Helm chart" is what turns a script into real, shippable infrastructure.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Connect to Your Project ▸</span>
+    <p>These four tools are the literal words on your résumé (Kubernetes, Terraform, Docker, CI/CD). The reason the LLMOps-control-plane project fits you so well is that its <em>delivery layer is your existing expertise</em>, and only the <em>AI-specific middle</em> (telemetry for LLMs) is new. You're not learning a new career — you're pointing skills you already have at the highest-demand target in the market.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li>Official docs are excellent: <strong>Docker</strong> (docs.docker.com), <strong>Kubernetes</strong> (kubernetes.io), <strong>Terraform</strong> (developer.hashicorp.com/terraform), <strong>Helm</strong> (helm.sh).</li>
+      <li>
+        <strong>"The Twelve-Factor App"</strong> (12factor.net) — timeless principles for building deployable services. Short and worth reading once.
+        <div style="margin-top: 10px; margin-bottom: 12px; padding-left: 14px; border-left: 2px solid var(--rule); font-size: 15.5px; line-height: 1.6;">
+          <div style="font-weight: 700; color: var(--ink); margin-bottom: 6px;">Overview of The Twelve-Factor App</div>
+          <p style="margin-bottom: 8px; font-size: 15px;">Originally authored by Adam Wiggins (based on building Heroku), the 12-Factor methodology outlines core principles for building scalable, maintainable SaaS applications that are portable across environments, scale seamlessly, minimize dev/prod gaps, and use declarative formats for automation.</p>
+
+          <div style="font-weight: 700; color: var(--ink); margin-bottom: 6px;">Key Takeaways for Developers</div>
+          <ul style="margin: 0 0 12px 18px; padding-left: 0;">
+            <li><strong>Config in the Environment (Factor III):</strong> Never hardcode credentials, URLs, or secret keys in your codebase. Always use environment variables so the exact same code deploys trivially across dev, staging, and prod environments.</li>
+            <li><strong>Stateless Processes (Factor VI):</strong> Execute app instances as stateless processes. Push any persistent state (user sessions, file uploads) to backing services like PostgreSQL or S3 to scale seamlessly.</li>
+            <li><strong>Strict Build/Release/Run Separation (Factor V):</strong> Maintain a strict pipeline from build (compilation) to release (combining code with config) to run. Never make manual code changes directly in runtime.</li>
+            <li><strong>Disposability (Factor IX):</strong> Maximize robustness with fast startup and graceful shutdown (handling <code>SIGTERM</code> properly), enabling auto-scalers to rapidly spin instances up or down.</li>
+          </ul>
+
+          <div style="font-weight: 700; color: var(--ink); margin-bottom: 6px;">Key Takeaways for AI Engineers</div>
+          <ul style="margin: 0 0 6px 18px; padding-left: 0;">
+            <li><strong>Models and Vector DBs as Backing Services (Factor IV):</strong> Treat external AI infrastructure (Pinecone, Redis prompt cache, GPU inference servers) as attached resources. Swap local mock databases for cloud vector DBs just by updating connection strings.</li>
+            <li><strong>Managing Prompts and Hyperparameters (Factor III):</strong> Treat system prompts, model targets (e.g. <code>gpt-4-turbo</code> vs <code>gpt-3.5</code>), temperature, and API keys as environment configurations to A/B test model setups without code pushes.</li>
+            <li><strong>Stateless Inference (Factor VI):</strong> Keep inference APIs stateless. Pass conversation history or context in from the client or fetch from a backing database rather than storing transient state in server memory.</li>
+            <li><strong>Observability and Logs as Event Streams (Factor XI):</strong> Treat non-deterministic AI logs as continuous event streams routed to observability tools (LangSmith, Arize, Datadog) to monitor hallucinations, token spend, latency, and concept drift over time.</li>
+          </ul>
+        </div>
+      </li>
+    </ul>
+  </div>
+</article>
+
+<!-- ===================== PART IV ===================== -->
+<section class="part" id="p4">
+  <div class="pnum">Part IV</div>
+  <h2>Your Project in Context</h2>
+  <p>You've now met every concept. This short part connects them all to the specific thing you're building, so the whole map clicks into a single picture.</p>
+</section>
+
+<!-- CH18 -->
+<article class="chap" id="c18">
+  <div class="ctag">Chapter 18</div>
+  <h3>The Control Plane, Mapped to Everything You've Learned</h3>
+
+  <p>Here is your project, feature by feature, each tagged with the chapter that explains it. This table is your interview cheat-sheet: every row is a thing you can talk about with real understanding.</p>
+
+  <div class="tw">
+    <table>
+      <tr><th>Feature of your control plane</th><th>What it does</th><th>Concept (chapter)</th></tr>
+      <tr><td>OpenAI-compatible endpoint</td><td>Apps point at you instead of the provider</td><td>Gateway (16)</td></tr>
+      <tr><td>Provider abstraction (mock + Anthropic)</td><td>Talk to many model backends uniformly</td><td>Models &amp; providers (5)</td></tr>
+      <tr><td>Per-request telemetry</td><td>Record latency, tokens, cost, provider, errors</td><td>Telemetry / observability (12)</td></tr>
+      <tr><td>Token &amp; cost tracking</td><td>Measure spend on every call</td><td>Tokens (4), LLMOps cost (14)</td></tr>
+      <tr><td>Summary metrics endpoint</td><td>Aggregate dashboard numbers</td><td>Metrics pillar (12)</td></tr>
+      <tr><td>Semantic caching (roadmap)</td><td>Reuse answers to similar requests</td><td>Embeddings (7), caching (16)</td></tr>
+      <tr><td>Routing &amp; failover (roadmap)</td><td>Pick the right model; survive outages</td><td>Routing (16), production reliability (11)</td></tr>
+      <tr><td>Alerting on anomalies (roadmap)</td><td>Catch latency/cost/error spikes</td><td>Drift &amp; monitoring (13)</td></tr>
+      <tr><td>Guardrails hook (optional)</td><td>Block unsafe input/output</td><td>Guardrails (15, 16)</td></tr>
+      <tr><td>Terraform + K8s + Helm deploy</td><td>Ship it as reproducible infrastructure</td><td>Delivery layer (17)</td></tr>
+      <tr><td>OpenTelemetry (roadmap)</td><td>Speak the industry observability standard</td><td>OpenTelemetry (12)</td></tr>
+    </table>
+  </div>
+
+  <p>Read that table top to bottom and notice: your one project legitimately touches the model layer, the application layer (embeddings/caching), the operational layer (telemetry, cost, alerting, guardrails), and the delivery layer (containers, orchestration, IaC). That is genuine breadth — but anchored in <em>one</em> coherent system you can explain end to end, which is exactly what makes a portfolio project persuasive rather than scattered.</p>
+
+  <div class="box try">
+    <span class="lbl">Try This ▸</span>
+    <p>Cover the right column and, for each feature, say which concept it uses and why it matters. When you can do the whole table from memory, you can handle the "walk me through your project" portion of any interview — because you won't just know <em>what</em> you built, you'll know <em>why</em> each piece exists.</p>
+  </div>
+</article>
+
+<!-- ===================== PART V ===================== -->
+<section class="part" id="p5">
+  <div class="pnum">Part V</div>
+  <h2>The Frontier</h2>
+  <p>Where the field is in 2026 and where it's heading — so you can hold a current conversation, and so you know which way to keep learning after this book. (Frontier claims move fast; treat these as direction, not gospel.)</p>
+</section>
+
+<!-- CH19 -->
+<article class="chap" id="c19">
+  <div class="ctag">Chapter 19</div>
+  <h3>What's New in 2026</h3>
+
+  <p>The big themes reshaping the field right now:</p>
+
+  <ul>
+    <li><strong>Reasoning models.</strong> A new class of models trained to "think" before answering — generating a hidden chain of reasoning, checking their own work — which sharply improves performance on math, code, and logic. The shift from "answer instantly" to "reason, then answer" is one of the defining moves of 2025–2026.</li>
+    <li><strong>Agents doing real work.</strong> The move from chatbots to <strong>agents</strong> that operate computers, browse the web, and complete multi-step tasks. "Computer use" and autonomous coding agents crossed from demo to daily-use tools.</li>
+    <li><strong>Massive multimodality.</strong> Models that natively handle text, images, audio, and video together — not text with bolt-on add-ons. Native video understanding (following actions across time, not just labeling frames) is a 2026 leap.</li>
+    <li><strong>Very long context.</strong> Context windows reaching hundreds of thousands to millions of tokens, changing what's possible (whole codebases or books in one prompt) and reshaping the RAG debate.</li>
+    <li><strong>Small &amp; on-device models.</strong> Models small and efficient enough to run on a phone or laptop — private, offline, free to run. A major counter-trend to "bigger is better."</li>
+    <li><strong>Efficiency architectures.</strong> <strong>Mixture-of-Experts (MoE)</strong> and aggressive <strong>quantization</strong> (running models in lower numeric precision) slash the cost of serving big models — directly relevant to the cost problems your project addresses.</li>
+    <li><strong>Standardization of plumbing.</strong> <strong>MCP</strong> for tools (Ch. 9) becoming an industry standard, plus emerging agent-to-agent and agent-payment protocols — the connective tissue of an "agent ecosystem."</li>
+  </ul>
+
+  <div class="box">
+    <span class="lbl">Key Term ▸ Quantization</span>
+    <p><strong>Quantization</strong> shrinks a model by storing its weights in lower precision (e.g., 4-bit instead of 16-bit numbers). The model gets much smaller and faster with only a small quality loss — which is how large models get squeezed onto consumer hardware. If you touch open models, you'll meet quantization immediately.</p>
+  </div>
+
+  <div class="box read">
+    <span class="lbl">Further Reading ▸</span>
+    <ul>
+      <li><strong>The Batch</strong> (deeplearning.ai) — Andrew Ng's weekly newsletter; the calmest signal on what actually matters.</li>
+      <li><strong>Latent Space</strong> (latent.space) — podcast/newsletter tracking the frontier for engineers.</li>
+      <li><strong>Simon Willison's blog</strong> (simonwillison.net) — near-daily, practical notes on every new release.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH20 -->
+<article class="chap" id="c20">
+  <div class="ctag">Chapter 20</div>
+  <h3>What Comes Next</h3>
+
+  <p>Nobody can predict this field precisely — anyone who claims certainty is selling something. But the visible trajectories, and the "next better version" of each thing in this book:</p>
+
+  <ul>
+    <li><strong>From RAG → context engineering / agentic memory.</strong> Retrieval becomes something the agent does dynamically, combined with persistent long-term memory across sessions, rather than a fixed pre-fetch step.</li>
+    <li><strong>From single agents → coordinated agent systems.</strong> And with them, a whole new infrastructure need: securing, observing, and governing agents that act autonomously — an area being actively built out (and a promising place to specialize).</li>
+    <li><strong>From "prompt and pray" → rigorous evaluation as standard practice.</strong> Evals become as normal for AI as unit tests are for software. The 2026 consensus is that eval and reliability are <em>the</em> thing teams must invest in — which keeps observability/LLMOps skills (yours) in high demand.</li>
+    <li><strong>From massive frontier models → the right-sized model for the job.</strong> Routing between many models (small/cheap ↔ large/capable) becomes the norm — validating exactly the routing feature on your roadmap.</li>
+    <li><strong>From closed labs → a mixed ecosystem.</strong> Strong open models keep the self-hostable path viable, which is precisely why a <em>self-hostable</em> control plane (yours) has lasting relevance for privacy- and cost-sensitive companies.</li>
+    <li><strong>The durable bet.</strong> Model capabilities will keep changing fast. The <em>infrastructure disciplines</em> — deployment, observability, cost control, reliability, security — change slowly and stay valuable regardless of which model wins. That's why building infra skill is the anti-fragile career move in a fast-moving field.</li>
+  </ul>
+
+  <div class="box next">
+    <span class="lbl">What This Means For You ▸</span>
+    <p>You worried that anything you build will be obsolete by the time you finish. Notice what's on this list: none of it obsoletes <em>observability, cost control, deployment, or reliability</em>. The models churn; the operational layer endures. You picked the part of the field that's built to last. Keep going.</p>
+  </div>
+</article>
+
+<!-- ===================== PART VI ===================== -->
+<section class="part" id="p6">
+  <div class="pnum">Part VI</div>
+  <h2>Reference</h2>
+  <p>A glossary of every term in this book, a curated reading list, and a concrete path for what to learn next.</p>
+</section>
+
+<!-- CH21 GLOSSARY -->
+<article class="chap" id="c21">
+  <div class="ctag">Chapter 21</div>
+  <h3>Glossary of Every Term</h3>
+
+  <dl class="gl">
+    <dt>Agent</dt><dd>An LLM that can take actions using tools and pursue a goal over multiple steps, not just produce text.</dd>
+    <dt>Attention</dt><dd>The Transformer mechanism that lets a model weigh which earlier tokens matter most for predicting the next one.</dd>
+    <dt>Backpropagation</dt><dd>The algorithm that calculates how to nudge each weight to reduce error during training.</dd>
+    <dt>Chunking</dt><dd>Splitting documents into small pieces before embedding them for retrieval.</dd>
+    <dt>Context engineering</dt><dd>The discipline of assembling everything a model sees at inference time (prompt, retrieved docs, tools, history, memory) within the context window.</dd>
+    <dt>Context window</dt><dd>The maximum number of tokens a model can consider at once.</dd>
+    <dt>Chain-of-thought</dt><dd>Prompting a model to reason step by step before answering, improving accuracy on logic-heavy tasks.</dd>
+    <dt>CI/CD</dt><dd>Continuous Integration / Continuous Deployment — automated testing and shipping of code (and, in ML, models).</dd>
+    <dt>Container / Docker</dt><dd>A portable package of an app plus its dependencies that runs identically everywhere.</dd>
+    <dt>Deep learning</dt><dd>Machine learning using many-layered neural networks.</dd>
+    <dt>Drift</dt><dd>Gradual divergence between live data and training data, silently degrading model performance.</dd>
+    <dt>Embedding</dt><dd>A vector of numbers representing the meaning of a piece of text; similar meanings get similar vectors.</dd>
+    <dt>Eval / eval set</dt><dd>A test (or curated test collection) for measuring an AI system's quality and catching regressions.</dd>
+    <dt>Fine-tuning</dt><dd>Further-training a model on your own examples to change its behavior or style (not to add new facts).</dd>
+    <dt>Function calling / tool use</dt><dd>A model outputting a structured request to run an external tool, enabling agents.</dd>
+    <dt>Gateway (AI gateway / LLM proxy)</dt><dd>A single entry point all model requests flow through, enabling caching, limits, logging, and failover.</dd>
+    <dt>Grounding / faithfulness</dt><dd>Whether an answer is actually supported by (faithful to) the retrieved source documents.</dd>
+    <dt>Guardrails</dt><dd>Real-time safety checks on inputs/outputs (toxicity, prompt injection, data leaks).</dd>
+    <dt>Hallucination</dt><dd>Fluent, confident model output that is factually wrong — a consequence of next-token prediction.</dd>
+    <dt>Helm</dt><dd>A package manager for Kubernetes; a Helm chart bundles an app's K8s config for one-command install.</dd>
+    <dt>Hugging Face</dt><dd>The main hub for sharing open models, datasets, and demos ("GitHub of models").</dd>
+    <dt>Inference</dt><dd>Using a trained model to get an answer — what your app does on every request (you pay each time).</dd>
+    <dt>Infrastructure as Code (IaC)</dt><dd>Defining infrastructure in version-controlled text files (e.g., Terraform) instead of manual setup.</dd>
+    <dt>Kubernetes (K8s)</dt><dd>The industry-standard orchestrator for running containers at scale.</dd>
+    <dt>LLM</dt><dd>Large Language Model — a deep-learning model trained on text to predict the next token.</dd>
+    <dt>LLM observability</dt><dd>Observability specialized for LLM signals: tokens, cost, model/provider, prompt/response, quality.</dd>
+    <dt>LLMOps</dt><dd>MLOps specialized for LLMs; the operational layer (observability, evals, cost, prompts, routing, guardrails) around LLM apps.</dd>
+    <dt>Logs / metrics / traces</dt><dd>The three pillars of observability: individual events / aggregated numbers / per-request journeys.</dd>
+    <dt>LoRA / PEFT</dt><dd>Cheap fine-tuning that trains a small adapter instead of the whole model.</dd>
+    <dt>MCP (Model Context Protocol)</dt><dd>An open standard for connecting models to tools and data uniformly ("USB for AI tools").</dd>
+    <dt>Machine learning (ML)</dt><dd>Getting programs to learn rules from examples instead of being explicitly programmed.</dd>
+    <dt>MLOps</dt><dd>DevOps for machine learning — reliably shipping and running models in production.</dd>
+    <dt>Mixture-of-Experts (MoE)</dt><dd>A model design that's huge in total but activates only a fraction per query, cutting serving cost.</dd>
+    <dt>Model</dt><dd>The trained artifact — the file of tuned numbers that maps inputs to outputs.</dd>
+    <dt>Model registry</dt><dd>A versioned catalog of trained models and their deployment stage.</dd>
+    <dt>Multimodal</dt><dd>Handling multiple data types (text, image, audio, video) in one model.</dd>
+    <dt>Observability</dt><dd>The ability to understand a system's internal state from the signals it emits.</dd>
+    <dt>Ollama</dt><dd>A tool for running a single open-weight model locally with one command.</dd>
+    <dt>OpenTelemetry (OTel)</dt><dd>The vendor-neutral industry standard for generating and collecting telemetry.</dd>
+    <dt>Parameters / weights</dt><dd>The tunable numbers inside a model; their count is its rough "size."</dd>
+    <dt>Prompt / system prompt</dt><dd>The text sent to a model; the system prompt is the developer-set framing for the whole conversation.</dd>
+    <dt>Prompt engineering</dt><dd>The craft of writing prompts to reliably get the desired output.</dd>
+    <dt>Prompt injection</dt><dd>An attack that hides malicious instructions in inputs to hijack a model's behavior.</dd>
+    <dt>Quantization</dt><dd>Storing model weights in lower numeric precision to shrink and speed up the model.</dd>
+    <dt>RAG</dt><dd>Retrieval-Augmented Generation — fetch relevant info first, then have the model answer using it.</dd>
+    <dt>Rate limiting</dt><dd>Capping how many requests a user/team can make in a time window.</dd>
+    <dt>Redis</dt><dd>A fast in-memory database, commonly used for caching, counters, and rate limiting.</dd>
+    <dt>Routing / failover</dt><dd>Choosing which model serves a request; automatically switching to a backup when one fails.</dd>
+    <dt>Semantic search / caching</dt><dd>Finding (or reusing answers for) similar-meaning text via embeddings rather than exact keywords.</dd>
+    <dt>Temperature</dt><dd>A randomness dial: low for focused/factual output, high for creative/varied output.</dd>
+    <dt>Telemetry</dt><dd>Data a system emits about its own behavior (measurements sent from inside for outside viewing).</dd>
+    <dt>Token</dt><dd>A chunk of text (~¾ of a word) — the unit models read and the unit you're billed on.</dd>
+    <dt>Training</dt><dd>The process of tuning a model's weights from data (expensive, occasional).</dd>
+    <dt>Transformer</dt><dd>The neural-network architecture (2017) behind modern LLMs; the "T" in GPT.</dd>
+    <dt>Vector database</dt><dd>A database built to store embeddings and find nearest neighbors quickly.</dd>
+  </dl>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH22 READING LIST -->
+<article class="chap" id="c22">
+  <div class="ctag">Chapter 22</div>
+  <h3>A Curated Reading List</h3>
+
+  <p>Not a link dump — a deliberately short list of the highest-signal resources, grouped by purpose. Start at the top of each group.</p>
+
+  <h4>To truly understand how it works (foundations)</h4>
+  <ul>
+    <li><strong>Andrej Karpathy — "Neural Networks: Zero to Hero"</strong> and <strong>"Intro to Large Language Models"</strong> (YouTube). The best free education on LLMs anywhere.</li>
+    <li><strong>3Blue1Brown — neural networks &amp; Transformers series</strong> (YouTube). Unmatched visual intuition.</li>
+    <li><strong>Jay Alammar — "The Illustrated Transformer"</strong> (jalammar.github.io).</li>
+  </ul>
+
+  <h4>To build real LLM applications</h4>
+  <ul>
+    <li><strong>Hugging Face courses</strong> (huggingface.co/learn) — LLM, NLP, and agents, free and hands-on.</li>
+    <li><strong>LangChain</strong> (python.langchain.com) and <strong>LlamaIndex</strong> (docs.llamaindex.ai) docs — the two dominant app frameworks.</li>
+    <li><strong>Simon Willison's blog</strong> (simonwillison.net) — the most practical running commentary on applied LLMs.</li>
+  </ul>
+
+  <h4>To do production / MLOps / LLMOps (your target)</h4>
+  <ul>
+    <li><strong>Chip Huyen — "AI Engineering"</strong> and <strong>"Designing Machine Learning Systems"</strong> (books). The most important reading for your goal.</li>
+    <li><strong>Made With ML</strong> by Goku Mohandas (madewithml.com) — free end-to-end MLOps course.</li>
+    <li><strong>Hamel Husain — "Your AI Product Needs Evals"</strong> (hamel.dev) — the essential evals article.</li>
+    <li><strong>Eugene Yan</strong> (eugeneyan.com) — applied, industry-tested writing.</li>
+    <li><strong>LiteLLM</strong> (docs.litellm.ai) and <strong>Langfuse</strong> (langfuse.com) docs — the closest real-world analogs to your project.</li>
+  </ul>
+
+  <h4>To stay current (weekly signal)</h4>
+  <ul>
+    <li><strong>The Batch</strong> (deeplearning.ai) · <strong>Latent Space</strong> (latent.space) · <strong>r/LocalLLaMA</strong> (Reddit).</li>
+  </ul>
+
+  <h4>The infra tools your project uses (official docs are best)</h4>
+  <ul>
+    <li><strong>Docker</strong> (docs.docker.com) · <strong>Kubernetes</strong> (kubernetes.io) · <strong>Terraform</strong> (developer.hashicorp.com/terraform) · <strong>Helm</strong> (helm.sh) · <strong>OpenTelemetry</strong> (opentelemetry.io) · <strong>FastAPI</strong> (fastapi.tiangolo.com).</li>
+  </ul>
+</article>
+
+<div class="signal-line"></div>
+
+<!-- CH23 LEARNING PATH -->
+<article class="chap" id="c23">
+  <div class="ctag">Chapter 23</div>
+  <h3>Your Learning Path from Here</h3>
+
+  <p>A book gives you the map; you still have to walk it. Here's a sane order, tuned to your background (strong on cloud/infra, newer to the AI-specific middle) and to the project you're building.</p>
+
+  <ol>
+    <li><strong>Cement the foundations (Part I).</strong> Watch the Karpathy "Intro to LLMs" talk once, end to end. Don't take notes; just build intuition. You'll understand 80% of AI conversations after this.</li>
+    <li><strong>Learn by extending your own project.</strong> You already have a working control plane. Each roadmap step teaches a concept <em>in context</em>, which sticks far better than tutorials: add the dashboard (observability), swap to SQLite (data), add Terraform + Helm (your strength, now applied), add alerting (monitoring), add semantic caching (embeddings). Build one, understand it fully, then the next.</li>
+    <li><strong>Read code you understand.</strong> Your stated goal is to <em>read</em> code confidently. Take one file from your project and, with AI explaining line by line, get to where you could rewrite it from scratch. Repeat weekly. This is the single highest-leverage habit for you.</li>
+    <li><strong>Go deep on one production topic.</strong> Pick observability/LLMOps (it matches your project and your target roles) and read Huyen's "AI Engineering" plus the Langfuse docs. Depth in one area beats shallow breadth in ten.</li>
+    <li><strong>Stay current 20 minutes a week.</strong> Skim The Batch or r/LocalLLaMA. Enough to hold a current conversation; not so much you drown.</li>
+  </ol>
+
+  <div class="box">
+    <span class="lbl">The One Idea to Keep ▸</span>
+    <p>The models will keep changing; the <em>operational disciplines</em> — observability, cost control, reliability, deployment — will not. You came in worried the field moves too fast to catch. The truth this book has tried to show you is narrower and kinder: the <em>surface</em> moves fast, the <em>foundations</em> barely move, and you already own most of the foundations that matter. Build on them.</p>
+  </div>
+</article>
+
+<footer>
+  THE FIELD GUIDE TO THE AI WORLD · EDITION 2026<br>
+  A companion to your LLMOps control plane. Written to be read once for the map, and returned to for the glossary.<br>
+  Note ▸ frontier facts in Parts V–VI reflect direction as of 2026 and move quickly — verify specifics before quoting them.
+</footer>
+
+</div>
+<script>
+  (function() {
+    const toggleBtn = document.getElementById('themeToggle');
+    const toggleText = document.getElementById('themeToggleText');
+    const sunIcon = document.getElementById('themeIconSun');
+    const moonIcon = document.getElementById('themeIconMoon');
+
+    function getCurrentTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        sunIcon.style.display = 'inline-block';
+        moonIcon.style.display = 'none';
+        toggleText.textContent = 'Light Mode';
+      } else {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'inline-block';
+        toggleText.textContent = 'Dark Mode';
+      }
+    }
+
+    let currentTheme = getCurrentTheme();
+    applyTheme(currentTheme);
+
+    toggleBtn.addEventListener('click', function() {
+      currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+      localStorage.setItem('theme', currentTheme);
+      applyTheme(currentTheme);
+    });
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+      if (!localStorage.getItem('theme')) {
+        currentTheme = e.matches ? 'dark' : 'light';
+        applyTheme(currentTheme);
+      }
+    });
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+# Default values for llmops chart.
+# This is a YAML-formatted file.
+
+replicaCount: 2
+
+image:
+  repository: llmops-control-plane
+  tag: latest
+  pullPolicy: IfNotPresent
+
+telemetry:
+  backend: postgres  # "postgres" for horizontal multi-replica, "sqlite" for single-node
+  databaseUrl: "postgresql://llmops:llmops123@postgres:5432/llmops_telemetry"
+
+secrets:
+  anthropicApiKey: ""
+
+# In-cluster subchart toggles for local dev (can be disabled when using managed cloud DB/Redis)
+postgres:
+  enabled: true
+  image: postgres:15-alpine
+  user: llmops
+  password: llmops123
+  database: llmops_telemetry
+
+redis:
+  enabled: true
+  image: redis:7-alpine
+
+alertThresholds:
+  windowSize: "50"
+  errorRate: "0.5"
+  providerFailures: "3"
+  costSpikeUsd: "1.0"
+  latencySpikeMs: "5000.0"
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: false
+  host: llmops.local
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

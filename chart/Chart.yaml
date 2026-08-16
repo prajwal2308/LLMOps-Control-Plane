@@ -1,0 +1,12 @@
+apiVersion: v2
+name: llmops
+description: A Helm chart for deploying the LLMOps Control Plane on Kubernetes
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+keywords:
+  - llmops
+  - fastapi
+  - opentelemetry
+  - guardrails
+  - routing

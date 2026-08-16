@@ -1,0 +1,34 @@
+# ==============================================================================
+# REDIS DEPLOYMENT -- SHARED IN-MEMORY COUNTER / RATE-LIMITING STORE
+# Cloud Replacement Note: In production cloud environments, replace with
+# managed Redis (e.g. AWS ElastiCache for Redis or GCP MemoryStore).
+# ==============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: llmops
+  labels:
+    app.kubernetes.io/name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

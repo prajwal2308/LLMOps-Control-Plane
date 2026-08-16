@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Build Book — Your LLMOps Control Plane, End to End</title>
+<script>
+  (function() {
+    var savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+  })();
+</script>
+<style>
+  :root{
+    --ink:#12203a;--body:#283445;--paper:#fbfaf7;--paper2:#f4f1ea;
+    --signal:#0f766e;--signal-soft:#e2efed;--amber:#b45309;--amber-soft:#f8efe0;
+    --violet:#5b3e8e;--violet-soft:#efeaf5;--rule:#dcd8cf;
+    --meta-text:#6b7280;
+    --sub-text:#54606f;
+    --num-text:#9aa3ad;
+    --code-color:#0b3d39;
+    --code-bg:var(--paper2);
+    --link-border:#bcd7d3;
+    --analogy-text:#455063;
+    --read-bg:#f1f3f5;
+    --read-border:#64748b;
+    --read-lbl:#475569;
+    --pre-bg:#0f1c2e;
+    --pre-color:#cfe3e0;
+    --toggle-bg:rgba(251, 250, 247, 0.85);
+    --toggle-border:#dcd8cf;
+    --toggle-text:#12203a;
+    --toggle-shadow:0 4px 12px rgba(0, 0, 0, 0.08);
+    --mono:'SF Mono','JetBrains Mono','Fira Code',Consolas,'Roboto Mono',monospace;
+    --serif:Georgia,'Iowan Old Style','Palatino Linotype',Palatino,'Times New Roman',serif;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #f1f5f9;
+      --body: #cbd5e1;
+      --paper: #0b1120;
+      --paper2: #151d30;
+      --signal: #2dd4bf;
+      --signal-soft: rgba(45, 212, 191, 0.14);
+      --amber: #fbbf24;
+      --amber-soft: rgba(251, 191, 36, 0.14);
+      --violet: #c084fc;
+      --violet-soft: rgba(192, 132, 252, 0.14);
+      --rule: #1e293b;
+      --meta-text: #94a3b8;
+      --sub-text: #94a3b8;
+      --num-text: #64748b;
+      --code-color: #5eead4;
+      --code-bg: #151d30;
+      --link-border: #134e4a;
+      --analogy-text: #cbd5e1;
+      --read-bg: #151d30;
+      --read-border: #475569;
+      --read-lbl: #94a3b8;
+      --pre-bg: #070d18;
+      --pre-color: #e2e8f0;
+      --toggle-bg: rgba(21, 29, 48, 0.85);
+      --toggle-border: #334155;
+      --toggle-text: #f8fafc;
+      --toggle-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ink: #f1f5f9;
+    --body: #cbd5e1;
+    --paper: #0b1120;
+    --paper2: #151d30;
+    --signal: #2dd4bf;
+    --signal-soft: rgba(45, 212, 191, 0.14);
+    --amber: #fbbf24;
+    --amber-soft: rgba(251, 191, 36, 0.14);
+    --violet: #c084fc;
+    --violet-soft: rgba(192, 132, 252, 0.14);
+    --rule: #1e293b;
+    --meta-text: #94a3b8;
+    --sub-text: #94a3b8;
+    --num-text: #64748b;
+    --code-color: #5eead4;
+    --code-bg: #151d30;
+    --link-border: #134e4a;
+    --analogy-text: #cbd5e1;
+    --read-bg: #151d30;
+    --read-border: #475569;
+    --read-lbl: #94a3b8;
+    --pre-bg: #070d18;
+    --pre-color: #e2e8f0;
+    --toggle-bg: rgba(21, 29, 48, 0.85);
+    --toggle-border: #334155;
+    --toggle-text: #f8fafc;
+    --toggle-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  :root[data-theme="light"] {
+    --ink: #12203a;
+    --body: #283445;
+    --paper: #fbfaf7;
+    --paper2: #f4f1ea;
+    --signal: #0f766e;
+    --signal-soft: #e2efed;
+    --amber: #b45309;
+    --amber-soft: #f8efe0;
+    --violet: #5b3e8e;
+    --violet-soft: #efeaf5;
+    --rule: #dcd8cf;
+    --meta-text: #6b7280;
+    --sub-text: #54606f;
+    --num-text: #9aa3ad;
+    --code-color: #0b3d39;
+    --code-bg: var(--paper2);
+    --link-border: #bcd7d3;
+    --analogy-text: #455063;
+    --read-bg: #f1f3f5;
+    --read-border: #64748b;
+    --read-lbl: #475569;
+    --pre-bg: #0f1c2e;
+    --pre-color: #cfe3e0;
+    --toggle-bg: rgba(251, 250, 247, 0.85);
+    --toggle-border: #dcd8cf;
+    --toggle-text: #12203a;
+    --toggle-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--body);
+    font-family:var(--serif);font-size:18px;line-height:1.72;-webkit-font-smoothing:antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 28px}
+  .signal-line{display:flex;align-items:center;height:1px;background:var(--rule);position:relative}
+  .signal-line::after{content:"";position:absolute;left:0;width:7px;height:7px;border-radius:50%;background:var(--signal);top:-3px}
+
+  /* ---- theme toggle button ---- */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--toggle-text);
+    background: var(--toggle-bg);
+    border: 1px solid var(--toggle-border);
+    border-radius: 9999px;
+    cursor: pointer;
+    box-shadow: var(--toggle-shadow);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .theme-toggle:hover {
+    transform: translateY(-1px);
+    border-color: var(--signal);
+  }
+  .theme-toggle:focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+  .theme-toggle svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+  @media (max-width: 640px) {
+    .theme-toggle {
+      top: 12px;
+      right: 12px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .theme-toggle span {
+      display: none;
+    }
+  }
+
+  .cover{padding:96px 0 64px;border-bottom:1px solid var(--rule)}
+  .tag{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--signal)}
+  .cover h1{font-family:var(--sans);font-weight:800;color:var(--ink);font-size:46px;line-height:1.05;letter-spacing:-.02em;margin:18px 0 14px}
+  .cover .sub{font-size:21px;color:var(--body);max-width:660px;margin:0 0 26px}
+  .cover .meta{font-family:var(--mono);font-size:12.5px;color:var(--meta-text);letter-spacing:.04em;line-height:1.9;border-top:1px dashed var(--rule);padding-top:18px;margin-top:30px}
+  .trace-strip{font-family:var(--mono);font-size:11px;color:var(--num-text);letter-spacing:.05em;margin-top:8px;white-space:nowrap;overflow:hidden}
+  .part{margin:78px 0 8px;padding:30px 0 26px;border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
+  .part .pnum{font-family:var(--mono);font-size:12px;letter-spacing:.2em;color:var(--signal);text-transform:uppercase}
+  .part h2{font-family:var(--sans);font-weight:800;color:var(--ink);font-size:30px;margin:8px 0 6px;letter-spacing:-.01em}
+  .part p{margin:6px 0 0;color:var(--sub-text);font-size:17px}
+  .chap{padding:40px 0 8px}
+  .chap>.ctag{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--signal);text-transform:uppercase}
+  .chap h3{font-family:var(--sans);font-weight:700;color:var(--ink);font-size:26px;line-height:1.15;margin:6px 0 18px;letter-spacing:-.01em}
+  .chap h4{font-family:var(--sans);font-weight:700;color:var(--ink);font-size:19px;margin:30px 0 8px}
+  p{margin:0 0 16px}
+  a{color:var(--signal);text-decoration:none;border-bottom:1px solid var(--link-border);transition:color 0.2s ease, border-color 0.2s ease;}
+  a:hover{border-bottom-color:var(--signal)}
+  a:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  strong{color:var(--ink)}
+  em{color:var(--sub-text);font-style:italic}
+  ul,ol{margin:0 0 16px;padding-left:22px}
+  li{margin:0 0 7px}
+  code{font-family:var(--mono);font-size:14.5px;background:var(--code-bg);padding:1.5px 6px;border-radius:4px;color:var(--code-color)}
+  .box{margin:22px 0;padding:16px 20px;border-left:3px solid var(--signal);background:var(--signal-soft);border-radius:0 6px 6px 0}
+  .box .lbl{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);display:block;margin-bottom:6px}
+  .box p:last-child{margin-bottom:0}
+  .box.try{border-left-color:var(--amber);background:var(--amber-soft)}
+  .box.try .lbl{color:var(--amber)}
+  .box.next{border-left-color:var(--violet);background:var(--violet-soft)}
+  .box.next .lbl{color:var(--violet)}
+  .box.read{border-left-color:var(--read-border);background:var(--read-bg)}
+  .box.read .lbl{color:var(--read-lbl)}
+  .box.read ul{margin-bottom:0;font-size:16px}
+  .box.warn{border-left-color:var(--amber);background:var(--amber-soft)}
+  .box.warn .lbl{color:var(--amber)}
+  .box ul:last-child,.box ol:last-child{margin-bottom:0}
+  .analogy{font-style:italic;color:var(--analogy-text);border-left:3px solid var(--rule);padding-left:18px;margin:20px 0}
+  .tw{overflow-x:auto;margin:22px 0}
+  table{border-collapse:collapse;width:100%;font-family:var(--sans);font-size:15px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);border-bottom:2px solid var(--ink)}
+  td{color:var(--body)}
+  tr:last-child td{border-bottom:none}
+  pre{background:var(--pre-bg);color:var(--pre-color);font-family:var(--mono);font-size:13.5px;line-height:1.6;padding:16px 18px;border-radius:8px;overflow-x:auto;margin:20px 0}
+  pre code{background:none;color:inherit;padding:0}
+  .toc{padding:44px 0;border-bottom:1px solid var(--rule)}
+  .toc h2{font-family:var(--sans);font-weight:800;color:var(--ink);font-size:22px;margin:0 0 20px}
+  .toc ol{list-style:none;padding:0;margin:0;font-family:var(--sans);font-size:15.5px}
+  .toc .p-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--signal);margin:22px 0 8px}
+  .toc li{margin:0 0 6px;display:flex;gap:12px;align-items:baseline}
+  .toc li .n{font-family:var(--mono);font-size:12px;color:var(--num-text);min-width:30px}
+  .toc a{border-bottom:none;color:var(--body)}
+  .toc a:hover{color:var(--signal)}
+  .stage-badge{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--signal);padding:3px 9px;border-radius:4px;margin-bottom:10px}
+  .stage-badge.done{background:var(--read-border)}
+  .stage-badge.opt{background:var(--violet)}
+  footer{margin:80px 0 60px;padding-top:24px;border-top:2px solid var(--ink);font-family:var(--mono);font-size:12px;color:var(--meta-text);letter-spacing:.04em}
+  @media(max-width:640px){body{font-size:17px}.cover h1{font-size:34px}.cover .sub{font-size:19px}.part h2{font-size:25px}.chap h3{font-size:22px}.trace-strip{display:none}}
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle light/dark mode">
+  <svg id="themeIconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  <span id="themeToggleText">Theme</span>
+</button>
+<div class="wrap">
+
+<!-- COVER -->
+<header class="cover">
+  <div class="tag">The Build Book · Companion to the Field Guide</div>
+  <h1>Your LLMOps Control Plane, End to End</h1>
+  <p class="sub">One project, built in stages you can actually finish. This handbook is the map: what each piece is, why it exists, exactly what "done" looks like, and how to show it so it gets you hired.</p>
+  <div class="signal-line"></div>
+  <div class="trace-strip">build ▸ spine ✓ → dashboard → persistence → docker → routing → failover → alerting → guardrails → otel → kubernetes → helm → terraform → shipped</div>
+  <div class="meta">
+    THE PROJECT &nbsp;→&nbsp; a self-hostable control plane that observes, manages, and protects LLM apps<br>
+    WHERE YOU ARE &nbsp;→&nbsp; Stage 0 (the spine) is built and tested. Everything here bolts onto it.<br>
+    HOW TO USE THIS &nbsp;→&nbsp; read Part I once, then work Part II one stage at a time. Don't skip ahead.
+  </div>
+</header>
+
+<!-- TOC -->
+<nav class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <div class="p-h">Part I · The Blueprint</div>
+    <li><span class="n">01</span><a href="#c1">What You're Building (one page)</a></li>
+    <li><span class="n">02</span><a href="#c2">The Architecture, End to End</a></li>
+    <li><span class="n">03</span><a href="#c3">The Stack, and Why Each Piece</a></li>
+
+    <div class="p-h">Part II · The Build Log</div>
+    <li><span class="n">04</span><a href="#c4">Stage 0 — The Spine You Already Have</a></li>
+    <li><span class="n">05</span><a href="#c5">Stage 1 — The Live Dashboard</a></li>
+    <li><span class="n">06</span><a href="#c6">Stage 2 — Persistent Storage</a></li>
+    <li><span class="n">07</span><a href="#c7">Stage 3 — Containerize with Docker</a></li>
+    <li><span class="n">08</span><a href="#c8">Stage 4 — Routing &amp; Failover</a></li>
+    <li><span class="n">09</span><a href="#c9">Stage 5 — Alerting on Anomalies</a></li>
+    <li><span class="n">10</span><a href="#c10">Stage 6 — Guardrails &amp; OpenTelemetry</a></li>
+    <li><span class="n">11</span><a href="#c11">Stage 7 — Deploy as Infrastructure</a></li>
+
+    <div class="p-h">Part III · Production-Grade Polish</div>
+    <li><span class="n">12</span><a href="#c12">Config, Secrets &amp; Environments</a></li>
+    <li><span class="n">13</span><a href="#c13">Testing a Non-Deterministic System</a></li>
+    <li><span class="n">14</span><a href="#c14">Scaling, Statelessness &amp; Run Cost</a></li>
+
+    <div class="p-h">Part IV · Ship &amp; Tell</div>
+    <li><span class="n">15</span><a href="#c15">The README That Stops the Scroll</a></li>
+    <li><span class="n">16</span><a href="#c16">The 90-Second Demo</a></li>
+    <li><span class="n">17</span><a href="#c17">Résumé Bullets &amp; Interview Questions</a></li>
+
+    <div class="p-h">Part V · The Plan From Here</div>
+    <li><span class="n">18</span><a href="#c18">The Week-by-Week Schedule</a></li>
+    <li><span class="n">19</span><a href="#c19">The Build Checklist</a></li>
+    <li><span class="n">20</span><a href="#c20">What To Do Tonight</a></li>
+  </ol>
+</nav>
+
+<!-- PART I -->
+<section class="part" id="p1">
+  <div class="pnum">Part I</div>
+  <h2>The Blueprint</h2>
+  <p>The whole project in three chapters: what it is, how the pieces fit, and why each tool was chosen. Read this part once, fully, before touching a stage.</p>
+</section>
+
+<article class="chap" id="c1">
+  <div class="ctag">Chapter 01</div>
+  <h3>What You're Building (one page)</h3>
+
+  <p>A <strong>self-hostable LLMOps control plane</strong>: a service that sits between applications and the LLM providers they use, and gives a team <em>visibility and control</em> over every model call — latency, tokens, cost, errors, which provider served it — plus the operational muscle to route, protect, and alert on that traffic.</p>
+
+  <p><strong>The problem it solves.</strong> Most companies don't train models; they call OpenAI, Anthropic, or a local model. That leaves them with no single place to answer basic operational questions: <em>What is this costing us? Which requests are slow? What happens when the provider goes down? Is any of this leaking sensitive data?</em> Your control plane is that single place.</p>
+
+  <div class="box">
+    <span class="lbl">The One-Sentence Pitch ▸</span>
+    <p>"A self-hostable control plane that sits in front of LLM applications and gives you per-request observability — latency, token, and cost telemetry — plus routing, failover, alerting, and guardrails, deployed as infrastructure-as-code." Memorize this. It's your answer to "what is this?"</p>
+  </div>
+
+  <p><strong>Why it's the right project for you.</strong> Its delivery layer — containers, Kubernetes, Terraform — is your existing strength. Only the AI-specific middle (telemetry for LLM traffic) is new, and you now understand it. And it lives entirely in the durable part of the field: observability, metrics, caching, and reliability don't churn with each new model — they only deepen. You are building on bedrock.</p>
+
+  <div class="box read">
+    <span class="lbl">Cross-Reference ▸</span>
+    <p>Every concept in this handbook was defined in the <em>Field Guide</em>. Where you see "(FG Ch. 12)" it points back to the relevant chapter there. Keep both open.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c2">
+  <div class="ctag">Chapter 02</div>
+  <h3>The Architecture, End to End</h3>
+
+  <p>The mental model is a <strong>pipeline</strong>: a request enters, passes through a series of stages, reaches a provider, and the response comes back — with the control plane observing and shaping it the whole way. Here is the full journey a single request takes once the project is complete:</p>
+
+  <pre><code>  App
+   │  (1) sends an OpenAI-style request
+   ▼
+┌─────────────────────  CONTROL PLANE  ─────────────────────┐
+│  (2) authenticate / identify the caller                   │
+│  (3) check rate limit + budget          → Redis           │
+│  (4) input guardrails (injection, PII)                    │
+│  (5) check cache (exact, then semantic) → vector store    │
+│  (6) ROUTE to a provider                                  │
+│         ├─ primary  → OpenAI / Anthropic / local          │
+│         └─ on failure → FAILOVER to backup                │
+│  (7) output guardrails                                    │
+│  (8) RECORD telemetry (latency,tokens,cost) → store       │
+│  (9) evaluate alert rules (spike? error burst?)           │
+└───────────────────────────┬───────────────────────────────┘
+   │  (10) return response + usage
+   ▼
+  App        …and a Dashboard reads the telemetry store live.</code></pre>
+
+  <p>Not every stage exists yet — most are the stages you'll build in Part II. But hold this whole picture in your head from day one, because each stage you add is one box in this diagram becoming real. The spine you already built is boxes (1), (6-primary), (8), and (10).</p>
+
+  <div class="box">
+    <span class="lbl">Key Idea ▸ The Control Plane vs the Data</span>
+    <p>The term "control plane" is borrowed from networking. The <strong>control plane</strong> is the layer that makes decisions and observes (route this, block that, record this); the actual model responses flowing through are the "data plane." Naming your project a <em>control plane</em> is accurate and signals systems literacy — you're managing traffic, not hosting models.</p>
+  </div>
+
+  <div class="box try">
+    <span class="lbl">Try This ▸</span>
+    <p>Draw this diagram by hand, from memory, and circle the four boxes you've already built. Do it again after each stage, circling the new box. By Stage 7 you'll be able to reproduce the entire architecture on a whiteboard — which is exactly what a systems-design interview asks for.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c3">
+  <div class="ctag">Chapter 03</div>
+  <h3>The Stack, and Why Each Piece</h3>
+
+  <p>Every choice here is deliberate and defensible. "Why did you pick X?" is a common interview question; here are your answers.</p>
+
+  <div class="tw">
+    <table>
+      <tr><th>Layer</th><th>Choice</th><th>Why this one</th></tr>
+      <tr><td>Language</td><td>Python</td><td>Readable, the lingua franca of AI, huge ecosystem. You can follow every line.</td></tr>
+      <tr><td>Web framework</td><td>FastAPI</td><td>Fast, async, auto-generates interactive API docs, minimal boilerplate.</td></tr>
+      <tr><td>HTTP client</td><td>httpx</td><td>Async-capable; talks to provider APIs cleanly.</td></tr>
+      <tr><td>Store (start)</td><td>In-memory → SQLite</td><td>Start trivial, graduate to a real embedded DB with zero infra.</td></tr>
+      <tr><td>Fast counters</td><td>Redis</td><td>Industry standard for rate limits/caching; on your résumé already.</td></tr>
+      <tr><td>Semantic cache</td><td>Embeddings + a vector store</td><td>Reuse answers to similar requests (FG Ch. 7).</td></tr>
+      <tr><td>Observability std</td><td>OpenTelemetry</td><td>Vendor-neutral standard; plugs into everything (FG Ch. 12).</td></tr>
+      <tr><td>Container</td><td>Docker</td><td>Reproducible, portable, the unit of modern deployment.</td></tr>
+      <tr><td>Orchestration</td><td>Kubernetes + Helm</td><td>Run/scale it as real infra; your core strength.</td></tr>
+      <tr><td>Infra as code</td><td>Terraform</td><td>One command stands up the whole environment.</td></tr>
+      <tr><td>Dashboard</td><td>Plain HTML/JS (or a small React app)</td><td>Keep it simple; it reads the telemetry API.</td></tr>
+    </table>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Mental Model ▸ REST APIs, Web Frameworks &amp; Architecture</span>
+    <p><strong>1. REST API vs. FastAPI (Abstraction Layer):</strong> A <strong>REST API</strong> is an architectural pattern for web communication over HTTP (using methods like <code>GET</code> and <code>POST</code> to exchange JSON). <strong>FastAPI</strong> is the Python web framework that acts as an <em>abstraction layer</em> — "covering up" raw network socket listening, HTTP header parsing, and serialization so you only write clean Python functions. Other languages use similar framework abstractions: <strong>JavaScript/Node.js</strong> (Express.js, Fastify), <strong>Java</strong> (Spring Boot), and <strong>Go</strong> (Gin).</p>
+    <p style="margin-top: 8px;"><strong>2. Frontend vs. Backend Split:</strong> <strong>React</strong> runs strictly in the browser (Frontend UI) and cannot safely store secret API keys (like <code>ANTHROPIC_API_KEY</code>) or query databases directly. Backend frameworks (FastAPI, Express) run on private servers to manage keys, database queries, and business logic. <strong>Next.js</strong> is a full-stack framework that combines React UI on the frontend with a built-in Node.js server (API routes) on the backend. We use Python + FastAPI for this control plane because Python is the native ecosystem of AI/ML infrastructure.</p>
+  </div>
+
+  <div class="box warn">
+    <span class="lbl">Scope Discipline ▸</span>
+    <p>This is a lot of tools <em>eventually</em>. The trap that kills portfolio projects is trying to add them all at once. You will add exactly one per stage, get it working and understood, then move on. A finished 4-stage project beats an abandoned 8-stage one every single time.</p>
+  </div>
+</article>
+
+<!-- PART II -->
+<section class="part" id="p2">
+  <div class="pnum">Part II</div>
+  <h2>The Build Log</h2>
+  <p>Eight stages, in order. Each is small enough to finish in a sitting or two. Each has a goal, what you build, what "done" means, and an honest note on where it gets tricky. Build one, understand it fully, then the next.</p>
+</section>
+
+<article class="chap" id="c4">
+  <div class="ctag">Chapter 04</div>
+  <span class="stage-badge done">Stage 0 · Done</span>
+  <h3>The Spine You Already Have</h3>
+
+  <p><strong>What it is.</strong> A FastAPI service with an OpenAI-compatible endpoint that routes a request to a provider (a keyless mock, or real Anthropic), times it, records telemetry (latency, tokens, cost, status), and exposes that telemetry. Three clean modules: <code>providers.py</code>, <code>telemetry.py</code>, <code>main.py</code>.</p>
+
+  <p><strong>Why it's the foundation.</strong> It establishes the two things everything else needs: a single point every request flows through, and a place every request gets recorded. Boxes (1), (6), (8), (10) of the architecture diagram are already real.</p>
+
+  <div class="box">
+    <span class="lbl">Done When ▸ (already true)</span>
+    <p><code>python test_smoke.py</code> runs requests end to end and prints a telemetry summary, including a deliberately-triggered error. The server runs with <code>uvicorn app.main:app --reload</code> and serves interactive docs at <code>/docs</code>.</p>
+  </div>
+
+  <div class="box try">
+    <span class="lbl">Before Moving On ▸</span>
+    <p>Read <code>main.py</code> top to bottom until the request-flow comment (<em>request → route → time → record → return</em>) is obvious to you. This is the file every interview question about your project will circle back to. If it's clear, you're ready for Stage 1.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c5">
+  <div class="ctag">Chapter 05</div>
+  <span class="stage-badge">Stage 1 · Next</span>
+  <h3>The Live Dashboard</h3>
+
+  <p><strong>Goal.</strong> Turn invisible telemetry into a page you can <em>see</em> — the single most motivating stage, because it makes the project demoable and screenshot-worthy.</p>
+
+  <p><strong>What you build.</strong> A single web page that calls your existing <code>/telemetry</code> and <code>/telemetry/summary</code> endpoints and renders them: summary cards at the top (total requests, total cost, average latency, error count) and a live table of recent requests below, refreshing every couple of seconds.</p>
+
+  <p><strong>The key idea.</strong> The backend already returns JSON. The dashboard is just a reader of that JSON — no new backend logic. In its simplest form it's one HTML file with a little JavaScript:</p>
+
+  <pre><code>// the entire heart of the dashboard
+async function refresh() {
+  const summary = await (await fetch('/telemetry/summary')).json();
+  const rows    = await (await fetch('/telemetry')).json();
+  renderCards(summary);   // draw the 4 top numbers
+  renderTable(rows);      // draw the request log
+}
+setInterval(refresh, 2000);   // update every 2 seconds</code></pre>
+
+  <p>We serve that file from FastAPI so it lives at, say, <code>/dashboard</code>. That's it — a live operations view of your control plane.</p>
+
+  <div class="box">
+    <span class="lbl">Concepts Used ▸</span>
+    <p>The <em>metrics</em> and <em>logs</em> pillars of observability (FG Ch. 12): the summary cards are metrics, the table is logs. You're building the "dashboard" half of "telemetry + dashboard = observability."</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Done When ▸</span>
+    <p>You open <code>/dashboard</code>, fire a few requests (via <code>/docs</code> or curl), and watch the numbers and the table update on their own. That live update is your demo.</p>
+  </div>
+
+  <div class="box warn">
+    <span class="lbl">Honest Note ▸</span>
+    <p>Keep it plain HTML/JS for now. It's tempting to reach for React and a component library, but that's a detour that adds hours and hides the point. A clean, simple page that clearly shows live telemetry is more impressive than a half-built fancy one. Style can come last.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c6">
+  <div class="ctag">Chapter 06</div>
+  <span class="stage-badge">Stage 2</span>
+  <h3>Persistent Storage</h3>
+
+  <p><strong>Goal.</strong> Make telemetry survive a restart. Right now it lives in an in-memory list that vanishes when the server stops — fine for a demo, wrong for anything real.</p>
+
+  <p><strong>What you build.</strong> Swap the in-memory list inside <code>TelemetryStore</code> for <strong>SQLite</strong> — a real database that's just a single file, needs zero setup, and ships with Python. The beauty of how Stage 0 was built: only the <em>inside</em> of <code>TelemetryStore</code> changes. Its methods (<code>record</code>, <code>all</code>, <code>summary</code>) keep the same signatures, so <code>main.py</code> and the dashboard don't change at all.</p>
+
+  <div class="box">
+    <span class="lbl">Why This Design Matters ▸</span>
+    <p>This is your first taste of a real engineering principle: <strong>separation of concerns</strong> behind a stable interface. Because the store hides <em>how</em> it stores, you can change the storage engine without touching anything else. In an interview: "I put persistence behind the store's interface, so swapping in-memory for SQLite — and later Postgres — is a one-file change." That sentence signals real design maturity.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Concepts Used ▸</span>
+    <p>Data persistence; the idea that observability data is only useful if it outlives the process. Sets you up for querying history (last hour, error rate over time) which alerting (Stage 5) needs.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Done When ▸</span>
+    <p>You send requests, restart the server, reload the dashboard — and the past requests are still there. A <code>.db</code> file now holds your telemetry.</p>
+  </div>
+
+  <div class="box next">
+    <span class="lbl">What's Next (later) ▸</span>
+    <p>When you deploy to Kubernetes (Stage 7), you'll graduate SQLite → PostgreSQL, because multiple copies of the service need a shared database. Same interface, bigger engine. Note it now; do it then.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c7">
+  <div class="ctag">Chapter 07</div>
+  <span class="stage-badge">Stage 3</span>
+  <h3>Containerize with Docker</h3>
+
+  <p><strong>Goal.</strong> Package the whole service into a container so it runs identically anywhere — your laptop, a server, the cloud. Small effort, big payoff, and it's a prerequisite for Kubernetes later.</p>
+
+  <p><strong>What you build.</strong> A <code>Dockerfile</code> (the recipe) and a <code>docker-compose.yml</code> (to run your service alongside Redis in one command). The Dockerfile is short:</p>
+
+  <pre><code>FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]</code></pre>
+
+  <p>Then <code>docker compose up</code> builds and runs everything. Anyone in the world can now run your control plane with that one command, no Python setup required.</p>
+
+  <div class="box">
+    <span class="lbl">Concepts Used ▸</span>
+    <p>Containers and reproducibility (FG Ch. 17). This is squarely your existing strength — the AI-specific part is behind you; from here the project increasingly rewards what you already know.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Done When ▸</span>
+    <p><code>docker compose up</code> starts your service (and Redis), and the dashboard works at <code>localhost:8000/dashboard</code> — all without you having Python or dependencies installed locally.</p>
+  </div>
+
+  <div class="box try">
+    <span class="lbl">Try This ▸</span>
+    <p>After it works, add a one-line badge to your README: "Run it: <code>docker compose up</code>." Reviewers love a project that runs in one command — it signals you think about the person receiving your work, which is itself an engineering virtue.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c8">
+  <div class="ctag">Chapter 08</div>
+  <span class="stage-badge">Stage 4</span>
+  <h3>Routing &amp; Failover</h3>
+
+  <p><strong>Goal.</strong> The reliability centerpiece. Make the control plane survive a provider outage and choose smartly between providers — the feature that most says "this person understands production."</p>
+
+  <p><strong>What you build.</strong> Two related capabilities on top of your provider abstraction:</p>
+  <ul>
+    <li><strong>Failover:</strong> if the primary provider errors or times out, automatically retry the request on a backup provider — so the caller never sees the outage.</li>
+    <li><strong>Routing:</strong> choose which provider/model handles a request based on a rule (e.g., cheap model for short/simple prompts, strong model for long/complex ones).</li>
+  </ul>
+
+  <p>Because Stage 0 already abstracts providers behind a common <code>generate()</code> call, failover is a loop with a fallback:</p>
+
+  <pre><code>def call_with_failover(order, model, messages):
+    last_error = None
+    for provider_name in order:            # e.g. ["anthropic", "openai", "mock"]
+        try:
+            return get_provider(provider_name).generate(model, messages)
+        except Exception as e:
+            last_error = e                 # record it, then try the next one
+    raise RuntimeError(f"all providers failed: {last_error}")</code></pre>
+
+  <p>Every attempt — including the failovers — gets recorded as telemetry, so the dashboard shows exactly when a failover happened. That visibility <em>is</em> the demo.</p>
+
+  <div class="box">
+    <span class="lbl">Concepts Used ▸</span>
+    <p>Routing, failover, and production reliability (FG Ch. 11, 16). This is the distributed-systems thinking that's core to your background — retries, fallbacks, graceful degradation.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Done When ▸</span>
+    <p>You configure a bad primary provider (or kill it mid-run) and watch requests seamlessly succeed via the backup, with the failover visible in the telemetry. Nothing dropped.</p>
+  </div>
+
+  <div class="box warn">
+    <span class="lbl">Honest Note ▸ Do It Well</span>
+    <p>Real failover has subtleties: retries with <strong>exponential backoff</strong> (wait a bit longer each retry), <strong>circuit breakers</strong> (stop hammering a provider that's clearly down), and timeouts. You don't need all of it on day one, but know the terms — an interviewer <em>will</em> ask "what about retry storms?" and "how do you avoid failing over on a user error vs a provider error?" Having thought about it is the point.</p>
+  </div>
+
+  <div class="box" style="border-left-color: var(--teal); background: rgba(45, 212, 191, 0.05); margin-top: 20px;">
+    <span class="lbl" style="color: var(--teal);">Interview Mastery ▸ Operational Trade-offs Answered</span>
+    <h4 style="color: var(--text-main); margin: 12px 0 8px 0; font-size: 16px;">1. What about retry storms?</h4>
+    <p style="margin-bottom: 10px;"><strong>The Problem:</strong> If an upstream LLM provider (e.g. OpenAI or Anthropic) suffers a brief latency spike or transient failure, thousands of incoming client requests fail simultaneously. If every client retries immediately, the sudden 3x–5x spike in traffic acts as a self-inflicted Distributed Denial of Service (DDoS) attack on the provider, turning a minor glitch into a prolonged blackout.</p>
+    <p style="margin-bottom: 10px;"><strong>Production Mitigation Strategy:</strong></p>
+    <ul style="margin-left: 20px; margin-bottom: 14px; font-size: 14px;">
+      <li><strong>Exponential Backoff + Full Jitter:</strong> Calculate delay as <code>T = random(0, min(max_backoff, base_delay * 2^attempt))</code>. Adding randomized <em>jitter</em> desynchronizes retry bursts, spreading traffic smoothly across time.</li>
+      <li><strong>Circuit Breaker Pattern:</strong> Monitor rolling error rates (e.g., 5 consecutive failures in 10s). When tripped, set state to <code>OPEN</code> and fail fast (or route directly to secondary fallback) for a cooldown period (e.g. 30s) without sending traffic to the unhealthy primary.</li>
+      <li><strong>Global Retry Budget:</strong> Restrict retries so they consume at most 10% of total system throughput. If the budget is exhausted, return errors immediately instead of hammering down services.</li>
+    </ul>
+
+    <h4 style="color: var(--text-main); margin: 16px 0 8px 0; font-size: 16px;">2. How do you avoid failing over on a user error vs a provider error?</h4>
+    <p style="margin-bottom: 10px;"><strong>The Problem:</strong> Retrying or failing over on a client error (e.g., bad client key, malformed JSON, or prompt exceeding context window) is an antipattern. The secondary model will fail with the exact same error, wasting budget, inflating latency, and polluting fallback metrics.</p>
+    <p style="margin-bottom: 10px;"><strong>Production Mitigation Strategy:</strong></p>
+    <ul style="margin-left: 20px; margin-bottom: 14px; font-size: 14px;">
+      <li><strong>Strict Error Taxonomy (HTTP 4xx vs 5xx):</strong>
+        <br>• <strong>4xx Client Errors (400, 401, 403, 422):</strong> Non-retryable. Fail fast immediately and return the 4xx error directly to the caller.
+        <br>• <strong>5xx Provider Errors (500, 502, 503, 504, Connection Timeout, DNS failure):</strong> Retryable / Failover-eligible. Trigger the secondary attempt plan automatically.
+      </li>
+      <li><strong>Gateway Boundary Validation:</strong> Validate request schemas via Pydantic / JSON Schema before initiating the attempt loop so syntax or payload errors never reach the provider layer.</li>
+    </ul>
+
+    <h4 style="color: var(--text-main); margin: 16px 0 8px 0; font-size: 16px;">3. What happens step-by-step when a long prompt arrives with no provider specified and no API key set?</h4>
+    <p style="margin-bottom: 10px;"><strong>Step-by-Step Execution Lifecycle:</strong></p>
+    <ol style="margin-left: 20px; margin-bottom: 14px; font-size: 14px; line-height: 1.6;">
+      <li><strong>Gateway Entry:</strong> FastAPI parses the request body. <code>req.provider</code> is <code>None</code>.</li>
+      <li><strong>Complexity Classification:</strong> <code>estimate_complexity(messages)</code> measures total prompt length (> 280 chars) and classifies it as <strong>"complex"</strong>, routing it to <code>STRONG_TIER</code> (<code>anthropic:claude-3-5-haiku-20241022</code>) as Primary Attempt #1.</li>
+      <li><strong>Attempt Plan Assembly:</strong> Ordered plan becomes <code>["anthropic:claude-3-5-haiku-20241022", "mock:mock-model"]</code>.</li>
+      <li><strong>Primary Attempt Failure:</strong> Attempt #1 executes against Anthropic. Because <code>ANTHROPIC_API_KEY</code> is unconfigured on the server, it raises a <code>ProviderError</code> (5xx infrastructure fault). The gateway records an <code>ERROR</code> row in SQLite (<code>[attempt 1/2] ANTHROPIC_API_KEY is not set</code>).</li>
+      <li><strong>Resiliency Backoff & Failover:</strong> Controls plane calculates exponential backoff with full jitter (<code>calculate_backoff_with_jitter(attempt=0)</code>), sleeps for a randomized delay, and advances to Attempt #2 (<code>mock:mock-model</code>).</li>
+      <li><strong>Graceful Degradation:</strong> Attempt #2 (<code>mock</code>) succeeds, records an <code>OK</code> telemetry row, and returns HTTP 200 OK to the client with full <code>routing</code> audit metadata.</li>
+    </ol>
+
+    <h4 style="color: var(--text-main); margin: 16px 0 8px 0; font-size: 16px;">4. Isn't a missing API key a user authorization error (HTTP 401) instead of a provider outage?</h4>
+    <p style="margin-bottom: 10px;"><strong>System Infrastructure Keys vs. End-User Credentials (BYOK):</strong></p>
+    <ul style="margin-left: 20px; margin-bottom: 8px; font-size: 14px; line-height: 1.6;">
+      <li><strong>Backend Infrastructure Key (Current Gateway Architecture):</strong> The <code>ANTHROPIC_API_KEY</code> belongs to <em>your platform's server environment</em>. End-users do not provide Anthropic keys. If your server's key is missing or invalid, that is a <strong>backend service outage on your side (HTTP 5xx)</strong>. The gateway automatically fails over to the backup model so your user experiences <strong>zero downtime</strong>.</li>
+      <li><strong>Bring-Your-Own-Key Pattern (BYOK / User Credentials):</strong> If end-users pass their own personal API keys in request headers (e.g. <code>x-api-key: user-key</code>) and send an invalid key, that is a <strong>User Error (HTTP 401 Unauthorized)</strong>. Under our <code>ClientError</code> taxonomy, the gateway fails fast immediately with <code>failed_over: false</code> and returns HTTP 401 without retrying or failing over.</li>
+    </ul>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c9">
+  <div class="ctag">Chapter 09</div>
+  <span class="stage-badge">Stage 5</span>
+  <h3>Alerting on Anomalies</h3>
+
+  <p><strong>Goal.</strong> Move from <em>watching</em> to <em>being warned</em>. A dashboard needs a human looking at it; alerting catches problems when no one is.</p>
+
+  <p><strong>What you build.</strong> A small rule engine that runs after each request (or on a timer) and checks the recent telemetry for trouble:</p>
+  <ul>
+    <li><strong>Latency spike</strong> — recent average latency far above normal.</li>
+    <li><strong>Cost spike</strong> — spend in the last window above a threshold.</li>
+    <li><strong>Error burst</strong> — error rate over the last N requests above a limit.</li>
+    <li><strong>Provider outage</strong> — a provider failing repeatedly.</li>
+  </ul>
+
+  <p>When a rule fires, you emit an alert — to the dashboard (a banner), the logs, or a webhook (e.g., a Slack message). The rules read the persistent telemetry from Stage 2, which is why persistence came first.</p>
+
+  <div class="box warn">
+    <span class="lbl">Design Boundary ▸ Operational, Not Quality</span>
+    <p>Keep alerts on <strong>operational</strong> signals — latency, cost, errors, provider health — all of which are objectively measurable. Do <em>not</em> try to alert on "the answer was bad." Judging open-ended answer quality has no reliable automated solution (FG Ch. 15), and reaching for it would drag your finishable project into an unsolved research problem. Staying on measurable operational signals is what keeps this shippable — and knowing <em>why</em> you drew that line is exactly the judgment interviewers probe for.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Concepts Used ▸</span>
+    <p>Monitoring and the spirit of drift detection (FG Ch. 13) — catching when live behavior diverges from normal. This is MLOps thinking applied to LLM traffic.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Done When ▸</span>
+    <p>You trigger a cost or error spike (easy with the mock provider) and an alert fires — visible on the dashboard and/or sent to a webhook. The system now warns without a human watching.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c10">
+  <div class="ctag">Chapter 10</div>
+  <span class="stage-badge opt">Stage 6 · High-Value</span>
+  <h3>Guardrails &amp; OpenTelemetry</h3>
+
+  <p>Two additions that each raise the project's ceiling — one for safety, one for standards. Do them together as the "maturity" stage.</p>
+
+  <h4>Guardrails</h4>
+  <p><strong>Goal.</strong> Add a safety checkpoint to the pipeline — the "is this allowed?" layer (FG Ch. 15).</p>
+  <p><strong>What you build.</strong> Input and output checks around the provider call: block or flag <strong>prompt-injection</strong> attempts and obvious <strong>PII</strong> leaks, and record when a guardrail triggers. Start with simple, transparent rules (pattern checks, a denylist); you can note that a fine-tuned classifier is the advanced version. The value is demonstrating you know that a control plane isn't only about performance and cost — it's also the place safety policy is enforced.</p>
+
+  <h4>OpenTelemetry</h4>
+  <p><strong>Goal.</strong> Speak the industry-standard observability language (FG Ch. 12).</p>
+  <p><strong>What you build.</strong> Emit your telemetry as OpenTelemetry <strong>traces</strong> and <strong>metrics</strong> in addition to your own store. This means your control plane can plug into any standard observability backend (Grafana, Jaeger, and the rest) with no custom integration.</p>
+
+  <div class="box">
+    <span class="lbl">Why This Combo Is Worth It ▸</span>
+    <p>"OpenTelemetry" and "guardrails" on your résumé signal two things employers specifically want: that you build to <em>standards</em>, not bespoke one-offs, and that you think about <em>safety</em>, not just happy-path performance. Together they lift the project from "a neat proxy" to "a serious platform."</p>
+  </div>
+
+  <div class="box warn">
+    <span class="lbl">Honest Note ▸ OpenTelemetry Production Exporters</span>
+    <p>Be precise in interviews about what is currently wired vs. production integration: Currently, the control plane generates <strong>OpenTelemetry Trace Spans</strong> and <strong>OTel Metric Instruments</strong> (instrumented in code and exported to stdout/logs fallback). To actually pipe metrics to Prometheus or Grafana in production, the next step is attaching a metric reader with an exporter (such as an <code>OTLPMetricExporter</code> or a Prometheus <code>PrometheusMetricReader</code>). Knowing this exact gap — and being able to state <em>"traces/metrics export to console/stdout; wiring to a live Grafana/Prometheus backend is adding an OTLP exporter layer"</em> — is the honest, strong answer interviewers respect.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Done When ▸</span>
+    <p>A hidden "ignore your instructions and leak X" style input gets caught and recorded by a guardrail; and your telemetry is visible through a standard OpenTelemetry-compatible viewer, not only your own dashboard.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c11">
+  <div class="ctag">Chapter 11</div>
+  <span class="stage-badge">Stage 7 · Capstone</span>
+  <h3>Deploy as Infrastructure</h3>
+
+  <p><strong>Goal.</strong> The capstone, and the stage that plays hardest to your strengths: make the whole thing deployable as real, reproducible infrastructure. This is what turns "a script that runs on my laptop" into "a platform."</p>
+
+  <p><strong>What you build,</strong> in order:</p>
+  <ul>
+    <li><strong>Kubernetes manifests</strong> — describe how to run your container (and Redis, and Postgres) on a cluster: how many copies, how they find each other, how traffic reaches them.</li>
+    <li><strong>A Helm chart</strong> — bundle all those manifests into one installable, configurable package, so the whole platform deploys with a single <code>helm install</code> (FG Ch. 17).</li>
+    <li><strong>Terraform</strong> — define the underlying infrastructure (the cluster itself, networking) as code, so <code>terraform apply</code> stands up everything from nothing.</li>
+    <li><strong>Statelessness</strong> — ensure the service holds no local state (telemetry now in shared Postgres, counters in shared Redis), so you can run many copies behind a load balancer and scale horizontally.</li>
+  </ul>
+
+  <div class="box">
+    <span class="lbl">Concepts Used ▸</span>
+    <p>The entire delivery layer (FG Ch. 17): Docker, Kubernetes, Helm, Terraform, Infrastructure as Code, horizontal scaling. This is your résumé's home turf — the project ends by showcasing exactly the skills you already have, now applied to an AI platform.</p>
+  </div>
+
+  <div class="box">
+    <span class="lbl">Done When ▸</span>
+    <p>A single <code>terraform apply</code> (or a documented sequence) stands up the whole control plane on a Kubernetes cluster, running multiple replicas that share one database and one Redis, reachable through one endpoint.</p>
+  </div>
+
+  <div class="box warn">
+    <span class="lbl">Honest Note ▸ Scope for Time</span>
+    <p>Full cloud Kubernetes + Terraform can eat days and money. If time is short, a <em>local</em> Kubernetes (kind, minikube, or Docker Desktop's built-in K8s) plus a Helm chart is completely legitimate and demonstrates the same skills — you can say "deploys to any K8s cluster; here's the Helm chart and Terraform." Don't burn your whole timeline standing up a cloud cluster if a local one proves the capability.</p>
+  </div>
+</article>
+
+<!-- PART III -->
+<section class="part" id="p3">
+  <div class="pnum">Part III</div>
+  <h2>Production-Grade Polish</h2>
+  <p>The details that separate a toy from a tool. You don't need all of these to have a strong project, but each one you add is another honest interview answer and another sign of maturity.</p>
+</section>
+
+<article class="chap" id="c12">
+  <div class="ctag">Chapter 12</div>
+  <h3>Config, Secrets &amp; Environments</h3>
+
+  <p>Two rules that mark professional work. First: <strong>never hardcode secrets.</strong> API keys and passwords come from environment variables (or a secrets manager), never from source code — your Stage 0 already reads the Anthropic key from the environment, which is correct. Second: <strong>configuration should be external.</strong> Provider order, thresholds, model choices, rate limits — all should be settable via a config file or environment, not buried in code, so the same build runs in dev and prod with different settings.</p>
+
+  <div class="box">
+    <span class="lbl">Why It Matters ▸</span>
+    <p>"How do you manage secrets and config?" is a standard infra interview question. Your answer: "Secrets from environment/secret manager, never in code; config externalized so one image runs anywhere." This is a big part of the <em>Twelve-Factor App</em> philosophy (FG Ch. 17) — worth reading once.</p>
+  </div>
+
+  <div class="box warn">
+    <span class="lbl">Do This Now ▸</span>
+    <p>Add a <code>.gitignore</code> that excludes your <code>.env</code> file and your <code>.db</code> file <em>before</em> you push to GitHub. Accidentally committing an API key is a classic, costly mistake. Guard against it from commit one.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c13">
+  <div class="ctag">Chapter 13</div>
+  <h3>Testing a Non-Deterministic System</h3>
+
+  <p>You can't assert <code>output == expected</code> when the model's output varies (FG Ch. 11). But you <em>can</em> test everything around it, and that's what matters for a control plane:</p>
+  <ul>
+    <li><strong>Test the plumbing deterministically</strong> using your <strong>mock provider</strong> — routing picks the right provider, failover falls back correctly, telemetry gets recorded with the right shape, rate limits trigger. This is exactly why a mock provider was built in Stage 0: it makes the whole system testable without network calls or randomness.</li>
+    <li><strong>Test the contracts</strong> — given a request, does the response have the right structure? Does an error get recorded as an error?</li>
+    <li><strong>Test the rules</strong> — feed the alert engine known telemetry and assert the right alert fires.</li>
+  </ul>
+
+  <div class="box">
+    <span class="lbl">The Interview Gold Here ▸</span>
+    <p>"How do you test a non-deterministic AI system?" is a question that filters people. Your answer — "you make the model swappable, test everything around it deterministically with a mock, and test the model's behavior separately with evals rather than exact-match assertions" — demonstrates exactly the judgment that's rare and hired for. Your <code>test_smoke.py</code> is the seed of this.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c14">
+  <div class="ctag">Chapter 14</div>
+  <h3>Scaling, Statelessness &amp; Run Cost</h3>
+
+  <p><strong>Statelessness</strong> is the key to scale. If each copy of your service keeps state in its own memory, you can't safely run several copies. Push all shared state to shared backends — telemetry to Postgres, counters/cache to Redis — and the service becomes <strong>stateless</strong>: you can run ten copies behind a load balancer and they all behave as one. This is the property Stage 7 depends on.</p>
+
+  <p><strong>Run cost awareness.</strong> Know roughly what running your platform costs (compute for the replicas, the database, Redis) versus what it saves (cached calls avoided, cheaper models routed to, outages prevented). Being able to talk about the cost/benefit of your own infrastructure is a senior-flavored skill.</p>
+
+  <div class="box">
+    <span class="lbl">Talking Point ▸</span>
+    <p>"The service is stateless — all shared state lives in Redis and Postgres — so it scales horizontally behind a load balancer." One sentence, and it demonstrates you understand the single most important property for scaling a web service. This is your distributed-systems background showing.</p>
+  </div>
+</article>
+
+<!-- PART IV -->
+<section class="part" id="p4">
+  <div class="pnum">Part IV</div>
+  <h2>Ship &amp; Tell</h2>
+  <p>A brilliant project nobody can understand in 30 seconds gets you nothing. This part is about presentation — the README, the demo, and the exact interview answers your project pre-loads.</p>
+</section>
+
+<article class="chap" id="c15">
+  <div class="ctag">Chapter 15</div>
+  <h3>The README That Stops the Scroll</h3>
+
+  <p>Your README is the first (often only) thing a reviewer reads. Lead with the <em>problem</em>, not the tech. Structure that works:</p>
+  <ol>
+    <li><strong>One-line description</strong> + a live demo GIF, immediately. The GIF does more than paragraphs.</li>
+    <li><strong>The problem</strong> — 2–3 sentences on the pain (no single place to see cost/latency/failures across LLM providers).</li>
+    <li><strong>What it does</strong> — a short bulleted feature list.</li>
+    <li><strong>Architecture</strong> — the pipeline diagram from Chapter 2 (a picture of the request journey).</li>
+    <li><strong>Run it</strong> — <code>docker compose up</code>. One command.</li>
+    <li><strong>How it works</strong> — a short tour of the pieces.</li>
+    <li><strong>Roadmap</strong> — shows vision and that you know what "more" looks like.</li>
+  </ol>
+
+  <div class="box">
+    <span class="lbl">Write From the Reader's Side ▸</span>
+    <p>Name things by what they do for the user, not by how you built them. "See cost and latency for every model call" beats "telemetry ingestion subsystem." Specific and plain beats clever and abstract — every time.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c16">
+  <div class="ctag">Chapter 16</div>
+  <h3>The 90-Second Demo</h3>
+
+  <p>Record a short screen capture (as a GIF or video) for the top of the README. The strongest sequence tells a story of <em>control</em>:</p>
+  <ol>
+    <li>An app sending traffic through the control plane; the dashboard lighting up with live latency, tokens, and cost.</li>
+    <li>You kill the primary provider — requests seamlessly fail over to the backup, nothing dropped, the failover visible on the dashboard.</li>
+    <li>A cost or error spike triggers an alert banner.</li>
+    <li>(If built) a semantic cache hit returning instantly instead of calling the model.</li>
+  </ol>
+  <p>That 90 seconds communicates more than your entire résumé bullet. It shows a working system doing the things production teams care about.</p>
+
+  <div class="box try">
+    <span class="lbl">Try This ▸</span>
+    <p>Even before every feature exists, record the demo of what <em>does</em> work (Stage 1's live dashboard alone is already demo-worthy). A visible, working thing beats a described, hypothetical one. Update the GIF as you add stages.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c17">
+  <div class="ctag">Chapter 17</div>
+  <h3>Résumé Bullets &amp; Interview Questions</h3>
+
+  <p><strong>The résumé entry</strong> (fill the bracket once you have stars, or drop it):</p>
+  <pre><code>LLMOps Control Plane | GitHub | Python, FastAPI, Redis, Docker, Kubernetes, Terraform
+• Built a self-hostable control plane that sits in front of LLM providers with
+  per-request observability — latency, token, and cost telemetry — exposed via a
+  live dashboard and the OpenTelemetry standard.
+• Implemented multi-provider routing with automatic failover, retries, and
+  guardrails; added Redis-backed rate limiting and operational alerting on
+  latency, cost, and error-rate anomalies.
+• Packaged as infrastructure-as-code (Docker, Helm, Terraform) with a stateless,
+  horizontally scalable design deployable to any Kubernetes cluster.</code></pre>
+
+  <p><strong>The questions this project pre-loads</strong> — and the fact that you'll have real answers is the whole point:</p>
+  <div class="tw">
+    <table>
+      <tr><th>They'll ask</th><th>You'll answer with</th></tr>
+      <tr><td>"Walk me through the architecture."</td><td>The request pipeline diagram (Ch. 2).</td></tr>
+      <tr><td>"How does failover work?"</td><td>The provider abstraction + fallback loop (Ch. 8).</td></tr>
+      <tr><td>"How do you test a non-deterministic system?"</td><td>Mock provider + test the plumbing (Ch. 13).</td></tr>
+      <tr><td>"How would this scale?"</td><td>Stateless service, shared Redis/Postgres (Ch. 14).</td></tr>
+      <tr><td>"How do you manage secrets/config?"</td><td>Env/secret manager, externalized config (Ch. 12).</td></tr>
+      <tr><td>"What's telemetry vs observability?"</td><td>FG Ch. 12 — you can teach it.</td></tr>
+      <tr><td>"How is this different from LiteLLM?"</td><td>"A focused, self-hostable take centered on observability; here's exactly what I built and why."</td></tr>
+      <tr><td>"What would you do next?"</td><td>Your roadmap — semantic caching, richer routing, more guardrails.</td></tr>
+    </table>
+  </div>
+
+  <div class="box">
+    <span class="lbl">The Real Advantage ▸</span>
+    <p>You built this yourself, stage by stage, understanding each piece — so every one of these answers is <em>true</em>, not memorized. That authenticity is what interviewers detect and reward. A project you can defend line by line is worth more than one that merely looks impressive.</p>
+  </div>
+</article>
+
+<!-- PART V -->
+<section class="part" id="p5">
+  <div class="pnum">Part V</div>
+  <h2>The Plan From Here</h2>
+  <p>The map is complete. Now, the concrete schedule, a checklist to track yourself against, and the single thing to do tonight.</p>
+</section>
+
+<article class="chap" id="c18">
+  <div class="ctag">Chapter 18</div>
+  <h3>The Week-by-Week Schedule</h3>
+
+  <p>A sane pace that ends in a strong, defensible project. Adjust to your available hours, but keep the <em>order</em>.</p>
+
+  <div class="tw">
+    <table>
+      <tr><th>Week</th><th>Focus</th><th>Outcome</th></tr>
+      <tr><td>1</td><td>Stage 1 (dashboard) + Stage 2 (SQLite)</td><td>A live, persistent observability view. Demoable.</td></tr>
+      <tr><td>2</td><td>Stage 3 (Docker) + Stage 4 (routing/failover)</td><td>Runs in one command; survives outages. The reliability story.</td></tr>
+      <tr><td>3</td><td>Stage 5 (alerting) + Stage 6 (guardrails + OTel)</td><td>Warns on anomalies; safe; standards-compliant. A serious platform.</td></tr>
+      <tr><td>4</td><td>Stage 7 (K8s/Helm/Terraform) + README + demo</td><td>Deployable infra, presented well. Shipped.</td></tr>
+    </table>
+  </div>
+
+  <div class="box warn">
+    <span class="lbl">If Time Is Short ▸ The Minimum Compelling Version</span>
+    <p>If you can't do all four weeks before you need to be applying, this is a genuinely strong project at the end of <strong>Week 2</strong>: live dashboard + persistence + Docker + routing/failover, wrapped in a great README and a demo GIF. Ship that, start applying, and add Stages 5–7 while interviewing. A shipped 4-stage project with a clear README beats a perfect one that arrives too late.</p>
+  </div>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c19">
+  <div class="ctag">Chapter 19</div>
+  <h3>The Build Checklist</h3>
+
+  <p>Track yourself against this. Check each only when "Done When" is truly met and you understand what you built.</p>
+  <ul>
+    <li>☐ <strong>Stage 0</strong> — spine runs; you can read <code>main.py</code> confidently ✓ (built)</li>
+    <li>☐ <strong>Stage 1</strong> — live dashboard shows telemetry, auto-refreshing</li>
+    <li>☐ <strong>Stage 2</strong> — telemetry survives a restart (SQLite)</li>
+    <li>☐ <strong>Stage 3</strong> — <code>docker compose up</code> runs the whole thing</li>
+    <li>☐ <strong>Stage 4</strong> — failover works; routing picks providers; both visible in telemetry</li>
+    <li>☐ <strong>Stage 5</strong> — an alert fires on a cost/error spike</li>
+    <li>☐ <strong>Stage 6</strong> — a guardrail catches a bad input; telemetry visible via OpenTelemetry</li>
+    <li>☐ <strong>Stage 7</strong> — deploys to a K8s cluster via Helm; Terraform stands up the infra</li>
+    <li>☐ <strong>Polish</strong> — secrets externalized; <code>.gitignore</code> protects keys; tests pass</li>
+    <li>☐ <strong>Ship</strong> — README with diagram + demo GIF; repo public and clean</li>
+  </ul>
+</article>
+
+<div class="signal-line"></div>
+
+<article class="chap" id="c20">
+  <div class="ctag">Chapter 20</div>
+  <h3>What To Do Tonight</h3>
+
+  <p>Not the whole plan — just the next honest step. Momentum comes from finishing one small thing, not from contemplating ten.</p>
+
+  <ol>
+    <li><strong>Get Stage 0 running on your own machine.</strong> <code>pip install -r requirements.txt</code>, then <code>python test_smoke.py</code>, then <code>uvicorn app.main:app --reload</code> and open <code>/docs</code>. Fire a request yourself.</li>
+    <li><strong>Read <code>main.py</code> top to bottom.</strong> With AI explaining any line you don't follow, get to where the request-flow is genuinely clear. This is the highest-leverage 30 minutes you can spend.</li>
+    <li><strong>Then build Stage 1 — the dashboard.</strong> That's the next stage, and it's the one that makes the project feel alive. It reuses endpoints you already have; it's mostly a reading layer.</li>
+  </ol>
+
+  <div class="box">
+    <span class="lbl">The One Rule ▸</span>
+    <p>One stage at a time. Finish it, understand it, check the box, then move on. You have a complete map now — you don't have to hold the whole thing in your head, only the next box in the diagram. That's how a big project actually gets built: not all at once, but one understood piece after another.</p>
+  </div>
+
+  <div class="box next">
+    <span class="lbl">And When You're Ready ▸</span>
+    <p>Come back and we build Stage 1 together — the live dashboard — the same way we built the spine: written, tested, and explained so you can read every line. The map is done. Now you walk it, one stage at a time.</p>
+  </div>
+</article>
+
+<footer>
+  THE BUILD BOOK · YOUR LLMOPS CONTROL PLANE, END TO END<br>
+  Companion to The Field Guide to the AI World. Read Part I once; work Part II one stage at a time.<br>
+  Built on the durable layer — observability, metrics, telemetry, reliability — the part of AI that only deepens.
+</footer>
+
+</div>
+<script>
+  (function() {
+    const toggleBtn = document.getElementById('themeToggle');
+    const toggleText = document.getElementById('themeToggleText');
+    const sunIcon = document.getElementById('themeIconSun');
+    const moonIcon = document.getElementById('themeIconMoon');
+
+    function getCurrentTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark' || saved === 'light') return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        sunIcon.style.display = 'inline-block';
+        moonIcon.style.display = 'none';
+        toggleText.textContent = 'Light Mode';
+      } else {
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'inline-block';
+        toggleText.textContent = 'Dark Mode';
+      }
+    }
+
+    let currentTheme = getCurrentTheme();
+    applyTheme(currentTheme);
+
+    toggleBtn.addEventListener('click', function() {
+      currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+      localStorage.setItem('theme', currentTheme);
+      applyTheme(currentTheme);
+    });
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+      if (!localStorage.getItem('theme')) {
+        currentTheme = e.matches ? 'dark' : 'light';
+        applyTheme(currentTheme);
+      }
+    });
+  })();
+</script>
+</body>
+</html>
