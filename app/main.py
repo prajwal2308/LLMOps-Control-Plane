@@ -17,10 +17,15 @@ Run it with:  uvicorn app.main:app --reload
 
 import logging
 import time
+import asyncio
+import random
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from pydantic import BaseModel
+
+DASHBOARD_HTML_PATH = Path(__file__).parent / "static" / "dashboard.html"
 
 from app.providers import get_provider, estimate_cost, ClientError, ProviderError
 from app.telemetry import TelemetryStore, RequestTelemetry
@@ -35,12 +40,92 @@ from app.stream import publish_telemetry_event, telemetry_event_generator  # SSE
 logger = logging.getLogger("llmops.alerts")
 logging.basicConfig(level=logging.INFO)
 
-DASHBOARD_HTML_PATH = Path(__file__).parent / "static" / "dashboard.html"
-
 app = FastAPI(title="LLMOps Control Plane", version="0.1.0")
 
 # One shared telemetry store for the whole app.
 store = TelemetryStore()
+
+
+def seed_initial_demo_telemetry():
+    """Populate 15 realistic historical records if telemetry store is brand new."""
+    try:
+        existing = store.all(limit=1)
+        if existing and len(existing) > 0:
+            return
+    except Exception:
+        pass
+
+    now = datetime.now(timezone.utc)
+    scenarios = [
+        ("mock", "CHEAP_TIER (mock-claude-3-haiku)", 135.2, 42, 98, 140, 0.00014, "ok", None, 50),
+        ("anthropic", "STRONG_TIER (claude-3-5-sonnet)", 740.8, 380, 810, 1190, 0.00412, "ok", None, 42),
+        ("guardrail", "Input Shield (Injection Blocked)", 12.0, 0, 0, 0, 0.0, "blocked", "Prompt injection pattern detected: 'ignore previous instructions'", 35),
+        ("mock", "Output Guardrail (PII Redacted)", 210.5, 120, 240, 360, 0.00036, "ok", None, 28),
+        ("anthropic", "STRONG_TIER (claude-3-5-sonnet)", 890.1, 410, 950, 1360, 0.00510, "ok", None, 22),
+        ("mock", "CHEAP_TIER (mock-claude-3-haiku)", 118.4, 35, 75, 110, 0.00011, "ok", None, 18),
+        ("anthropic", "Primary Fallback (429 RateLimit)", 1450.0, 520, 880, 1400, 0.00520, "ok", None, 12),
+        ("mock", "CHEAP_TIER (mock-claude-3-haiku)", 142.0, 50, 110, 160, 0.00016, "ok", None, 8),
+        ("guardrail", "Input Shield (Injection Blocked)", 11.5, 0, 0, 0, 0.0, "blocked", "Banned pattern detected: 'system override'", 5),
+        ("anthropic", "STRONG_TIER (claude-3-5-sonnet)", 690.3, 310, 720, 1030, 0.00390, "ok", None, 2),
+    ]
+
+    for prov, mdl, lat, p_tok, c_tok, t_tok, cost, status, err, minutes_ago in scenarios:
+        rec_time = (now - timedelta(minutes=minutes_ago)).isoformat()
+        rec = RequestTelemetry(
+            provider=prov,
+            model=mdl,
+            latency_ms=lat,
+            prompt_tokens=p_tok,
+            completion_tokens=c_tok,
+            total_tokens=t_tok,
+            cost_usd=cost,
+            status=status,
+            error=err,
+            timestamp=rec_time,
+        )
+        try:
+            store.record(rec)
+        except Exception as e:
+            logger.warning("Failed to seed demo record: %s", e)
+
+
+async def run_demo_traffic_loop():
+    """Background heartbeat generating 1 realistic simulated request every 25s for live demo streaming."""
+    await asyncio.sleep(5)  # Wait for startup
+    demo_scenarios = [
+        {"provider": "mock", "model": "CHEAP_TIER (mock-claude-3-haiku)", "latency_ms": 138.5, "p_tok": 40, "c_tok": 90, "cost": 0.00013, "status": "ok", "error": None},
+        {"provider": "anthropic", "model": "STRONG_TIER (claude-3-5-sonnet)", "latency_ms": 780.2, "p_tok": 410, "c_tok": 880, "cost": 0.00440, "status": "ok", "error": None},
+        {"provider": "guardrail", "model": "Input Shield (Injection Blocked)", "latency_ms": 14.0, "p_tok": 0, "c_tok": 0, "cost": 0.0, "status": "blocked", "error": "Prompt injection blocked"},
+        {"provider": "mock", "model": "Output Guardrail (PII Redacted)", "latency_ms": 195.0, "p_tok": 130, "c_tok": 260, "cost": 0.00039, "status": "ok", "error": None},
+    ]
+
+    idx = 0
+    while True:
+        try:
+            item = demo_scenarios[idx % len(demo_scenarios)]
+            idx += 1
+            rec = RequestTelemetry(
+                provider=item["provider"],
+                model=item["model"],
+                latency_ms=item["latency_ms"] + random.uniform(-15.0, 25.0),
+                prompt_tokens=item["p_tok"],
+                completion_tokens=item["c_tok"],
+                total_tokens=item["p_tok"] + item["c_tok"],
+                cost_usd=item["cost"],
+                status=item["status"],
+                error=item["error"],
+            )
+            store.record(rec)
+            publish_telemetry_event(rec.to_dict())
+        except Exception as e:
+            logger.debug("Demo background traffic generator iteration skipped: %s", e)
+        await asyncio.sleep(25)
+
+
+@app.on_event("startup")
+def on_startup():
+    seed_initial_demo_telemetry()
+    asyncio.create_task(run_demo_traffic_loop())
 
 
 
