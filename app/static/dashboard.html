@@ -544,7 +544,7 @@
         });
         const data = await resp.json();
         out.textContent = JSON.stringify(data, null, 2);
-        fetchTelemetry();
+        refresh();
       } catch (err) {
         out.style.color = "var(--red)";
         out.textContent = "Error sending request: " + err;
