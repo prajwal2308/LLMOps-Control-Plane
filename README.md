@@ -101,8 +101,8 @@ An enterprise-grade, self-hostable **LLMOps Gateway & Control Plane** that sits 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/LLMOps-control-plane.git
-cd LLMOps-control-plane
+git clone https://github.com/prajwal2308/LLMOps-Control-Plane.git
+cd LLMOps-Control-Plane
 
 # Create virtual environment and install dependencies
 python3 -m venv .venv
