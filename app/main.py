@@ -44,6 +44,7 @@ store = TelemetryStore()
 
 
 
+@app.get("/", response_class=HTMLResponse)
 @app.get("/dashboard", response_class=HTMLResponse)
 def get_dashboard():
     """Live operations dashboard showing real-time metrics and logs."""
