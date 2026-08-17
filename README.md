@@ -18,7 +18,7 @@ An enterprise-grade, self-hostable **LLMOps Gateway & Control Plane** that sits 
 ## 🎥 Control Plane Demo Video
 
 <p align="center">
-  <video src="docs/assets/LLMOps-Control-Plane-Demo.mp4" controls="controls" width="100%" style="max-width: 900px; border-radius: 10px;"></video>
+  <video src="DOCS/assets/LLMOps-Control-Plane-Demo.mp4" controls="controls" width="100%" style="max-width: 900px; border-radius: 10px;"></video>
 </p>
 
 ---
