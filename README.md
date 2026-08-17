@@ -11,7 +11,7 @@
 > **🚀 Live Operations Dashboard:**  
 > Access the live running production control plane at **[https://llmops-control-plane.onrender.com](https://llmops-control-plane.onrender.com)**
 
-An enterprise-grade, self-hostable **LLMOps Gateway & Control Plane** that sits between your applications and LLM providers (OpenAI, Anthropic, Google Gemini, Bedrock, Fireworks, xAI). It provides **real-time telemetry, cost tracking, complexity-based model routing, automatic failover chains, security guardrails, operational alerts, and OpenTelemetry observability** — wrapped in an OpenAI-compatible API interface.
+A production-ready, self-hostable **LLMOps Gateway & Control Plane** that sits between your applications and LLM providers (OpenAI, Anthropic, Google Gemini, Bedrock, Fireworks, xAI). It provides **real-time telemetry, cost tracking, complexity-based model routing, automatic failover chains, security guardrails, operational alerts, and OpenTelemetry observability** — wrapped in an OpenAI-compatible API interface.
 
 ---
 
